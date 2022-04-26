@@ -14,7 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
 app.use('/examples', express.static(path.join(__dirname, 'examples')))
-app.use('/models', express.static(path.join(__dirname, 'examples/models')))
+app.use('/models', express.static(path.join(path.join(__dirname, 'examples'),'models')))
 
 
 app.get('/', function(request, response) {
