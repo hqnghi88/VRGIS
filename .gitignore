@@ -7,7 +7,6 @@
 /obj/
 /bin/
 /.vs/
-/examples/config.js
 /.vs/ThreeboxSolution/v16
 /tests/node_modules
 /tests/obj/Debug
