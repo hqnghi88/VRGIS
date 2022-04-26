@@ -51,7 +51,7 @@
 	<div id='map' class='map'>
 		<div class="mapboxgl-ctrl helpDiv">
 			<div id="help" class="help">
-				Press "W", "A", "S", "D" keys to drive the truck
+				Press "W", "A", "S", "D" keys to walk
 			</div>
 		</div>
 	</div>
@@ -63,7 +63,7 @@
 
 		let minZoom = 12;
 		let mapConfig = {
-			map: { center: [105.771453381, 10.022111449], zoom: 22, pitch: 60, bearing: 38 },
+			map: { center: [105.771453381, 10.022111449], zoom: 22, pitch: 75, bearing: 38 },
 			truck: {
 				origin: [105.771453381, 10.022111449],
 				type: 'glb',
@@ -121,7 +121,7 @@
 						// type: mapConfig.truck.type, //model type
 						// obj: mapConfig.truck.model + "." + mapConfig.truck.type,
 
-						obj: 'https://github.com/mrdoob/three.js/blob/dev/examples/models/gltf/Soldier.glb',
+						obj: 'examples/models/soldier.glb',
 						type: 'gltf',
 						units: 'meters', // in meters
 						rotation: { x: 90, y: 180, z: 0 },

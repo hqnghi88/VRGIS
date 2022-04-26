@@ -13,6 +13,8 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
+app.use('/examples', express.static(path.join(__dirname, 'examples')))
+
 
 app.get('/', function(request, response) {
     response.sendFile(path.join(__dirname + '/examples/20-game.html'));
