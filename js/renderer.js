@@ -12,7 +12,7 @@ mapboxgl.accessToken = config.accessToken;
 
 
 let minZoom = 12;
-let mapConfig = {
+var mapConfig = {
     map: { center: [-73.979681, 40.6974881], zoom: 22, pitch: 75, bearing: 38 },//[105.771453381, 10.022111449]
     human: {
         origin: [-73.979681, 40.6974881],
@@ -31,7 +31,7 @@ let mapConfig = {
     }
 }
 
-let map = new mapboxgl.Map({
+var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/satellite-streets-v11',
     zoom: mapConfig.map.zoom,
@@ -45,20 +45,19 @@ window.tb = new Threebox(
     map,
     map.getCanvas().getContext('webgl'),
     {
-        realSunlight: true,
-        enableSelectingObjects: true,
-        enableDraggingObjects: true,
-        enableRotatingObjects: true,
-        enableTooltips: true
+        defaultLights: true,
+        // realSunlight: true,
+        // enableSelectingObjects: true,
+        // enableDraggingObjects: true,
+        // enableRotatingObjects: true,
+        // enableTooltips: true
     }
 );
 
-tb.setSunlight(mapConfig.human.date, map.getCenter());
+// tb.setSunlight(mapConfig.human.date, map.getCenter());
 
 // parameters to ensure the model is georeferenced correctly on the map
-let human; let human1;
-
-var soldier;
+let human;  
 function createCustomLayer(layerName) {
     let model;
     //create the layer
@@ -66,34 +65,34 @@ function createCustomLayer(layerName) {
         id: layerName,
         type: 'custom',
         renderingMode: '3d',
-        onAdd: function (map, gl) {
+        onAdd: function (map, gl) { 
+            Client.askNewPlayer();
+            // let options = {
+            //     type: mapConfig.human.type, //model type
+            //     obj: mapConfig.human.model + "." + mapConfig.human.type,
 
-            let options = {
-                type: mapConfig.human.type, //model type
-                obj: mapConfig.human.model + "." + mapConfig.human.type,
+            //     // obj: 'models/Soldier.glb',
+            //     // type: 'glb',//gltf
+            //     units: 'meters', // in meters
+            //     rotation: { x: 90, y: 180, z: 0 },
+            //     scale: mapConfig.human.scale, //x3 times is real size for this model
+            //     // rotation: mapConfig.human.rotation, //default rotation
+            //     anchor: 'top',
+            //     clone: false //objects won't be cloned
+            // }
+            // tb.loadObj(options, function (model) {
+            //     human = model.setCoords(mapConfig.human.origin);
+            //     human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+            //     human.addTooltip("Walk with WASD keys", true, human.anchor, true, 2);
+            //     human.castShadow = true;
+            //     human.selected = true;
+            //     human.addEventListener('ObjectChanged', onObjectChanged, false);
+            //     tb.lights.dirLight.target = model;
 
-                // obj: 'models/Soldier.glb',
-                // type: 'glb',//gltf
-                units: 'meters', // in meters
-                rotation: { x: 90, y: 180, z: 0 },
-                scale: mapConfig.human.scale, //x3 times is real size for this model
-                // rotation: mapConfig.human.rotation, //default rotation
-                anchor: 'top',
-                clone: false //objects won't be cloned
-            }
-            tb.loadObj(options, function (model) {
-                human = model.setCoords(mapConfig.human.origin);
-                human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
-                human.addTooltip("Walk with WASD keys", true, human.anchor, true, 2);
-                human.castShadow = true;
-                human.selected = true;
-                human.addEventListener('ObjectChanged', onObjectChanged, false);
-                tb.lights.dirLight.target = model;
+            //     tb.add(human);
+            //     init();
 
-                tb.add(human);
-                init();
-
-            });
+            // });
 
 
         },
@@ -169,9 +168,9 @@ function createCompositeLayer(layerId) {
     return layer;
 }
 
-import { GUI } from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
-import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
-let stats, gui;
+// import { GUI } from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
+// import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
+// let stats, gui;
 let fHover;
 
 let api = {
@@ -182,8 +181,8 @@ let api = {
 
 function init() {
     // stats
-    stats = new Stats();
-    map.getContainer().appendChild(stats.dom);
+    // stats = new Stats();
+    // map.getContainer().appendChild(stats.dom);
 
     keys = {
         a: false,
@@ -208,11 +207,11 @@ function init() {
     animate();
 
     // gui
-    gui = new GUI();
-    // this will define if there's a fixed zoom level for the model
-    gui.add(api, 'buildings').name('buildings').onChange(changeGui);
-    gui.add(api, 'acceleration', 1, 10).step(0.5);
-    gui.add(api, 'inertia', 1, 5).step(0.5);
+    // gui = new GUI();
+    // // this will define if there's a fixed zoom level for the model
+    // gui.add(api, 'buildings').name('buildings').onChange(changeGui);
+    // gui.add(api, 'acceleration', 1, 10).step(0.5);
+    // gui.add(api, 'inertia', 1, 5).step(0.5);
 }
 
 function changeGui() {
@@ -227,72 +226,8 @@ function changeGui() {
 
     tb.map.repaint = true;
 }
-const w = canvas.width = 500;
-const h = canvas.height = 300;
-const ctx = canvas.getContext('2d');
-let invertX = false;
 
-const scene = {
-    objects: [],
-    update(t) {
-        // here we only update the objects
-        this.objects.forEach(obj => {
-            if (invertX) {
-                obj.dx *= -1;
-            }
-            obj.x += obj.dx;
-            obj.y += obj.dy;
-            if (obj.x > w) obj.x = (obj.x - w) - obj.w;
-            if (obj.x + obj.w < 0) obj.x = w - (obj.x + obj.w);
-            if (obj.y > h) obj.y = (obj.y - h) - obj.h;
-            if (obj.y + obj.h < 0) obj.y = h - (obj.y + obj.h);
-        });
-        invertX = false;
-    },
-    draw() {
-        // here we only draw
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        this.objects.forEach(obj => {
-            ctx.fillStyle = obj.fill;
-            ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
-        });
-    }
-}
-
-function mainLoop() {
-    scene.update();
-    scene.draw();
-    requestAnimationFrame(mainLoop);
-}
-
-for (let i = 0; i < 50; i++) {
-    scene.objects.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        w: Math.random() * w / 5,
-        h: Math.random() * h / 5,
-        dx: (Math.random() * 3 - 1.5),
-        dy: (Math.random() * 3 - 1.5),
-        fill: '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16)
-    });
-}
-// every second do something external
-setInterval(() => {
-    invertX = true;
-}, 1000);
-// make one follow the cursor
-onmousemove = e => {
-    const evtX = e.clientX - canvas.offsetLeft;
-    const evtY = e.clientY - canvas.offsetTop;
-    const obj = scene.objects[0];
-    const dirX = Math.sign(evtX - obj.x);
-    const dirY = Math.sign(evtY - obj.y);
-    obj.dx = Math.abs(obj.dx) * dirX;
-    obj.dy = Math.abs(obj.dy) * dirY;
-}
-
-let duration = 100;
+let duration = 50;
 var opt = {
     animation: 3,
     duration: duration
@@ -300,60 +235,59 @@ var opt = {
 // mainLoop();
 function animate() {
     // human.playAnimation(opt);
-    
     pple.forEach((value) => {
-        value.playAnimation(opt);
+        value.playAnimation({ animation: 3, duration: 100000000 }) ;
     })
     requestAnimationFrame(animate);
-    stats.update();
-    speed = 0.0;
+    // stats.update();
+    // speed = 0.0;
 
-    if (!(keys.w || keys.s)) {
-        if (velocity > 0) { speed = -api.inertia * ds }
-        else if (velocity < 0) { speed = api.inertia * ds }
-        if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
-    }
+    // if (!(keys.w || keys.s)) {
+    //     if (velocity > 0) { speed = -api.inertia * ds }
+    //     else if (velocity < 0) { speed = api.inertia * ds }
+    //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
+    // }
 
-    if (keys.w)
-        speed = api.acceleration * ds;
-    else if (keys.s)
-        speed = -api.acceleration * ds;
+    // if (keys.w)
+    //     speed = api.acceleration * ds;
+    // else if (keys.s)
+    //     speed = -api.acceleration * ds;
 
-    velocity += (speed - velocity) * api.acceleration * ds;
-    if (speed == 0.0) {
-        velocity = 0;
-        return;
-    }
+    // velocity += (speed - velocity) * api.acceleration * ds;
+    // if (speed == 0.0) {
+    //     velocity = 0;
+    //     return;
+    // }
 
-    human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
+    // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
 
-    let options = {
-        center: human.coordinates,
-        bearing: map.getBearing(),
-        easing: easing
-    };
+    // let options = {
+    //     center: human.coordinates,
+    //     bearing: map.getBearing(),
+    //     easing: easing
+    // };
 
-    function toDeg(rad) {
-        return rad / Math.PI * 180;
-    }
+    // function toDeg(rad) {
+    //     return rad / Math.PI * 180;
+    // }
 
-    function toRad(deg) {
-        return deg * Math.PI / 180;
-    }
+    // function toRad(deg) {
+    //     return deg * Math.PI / 180;
+    // }
 
-    let deg = 1;
-    let rad = toRad(deg);
-    let zAxis = new THREE.Vector3(0, 0, 1);
+    // let deg = 1;
+    // let rad = toRad(deg);
+    // let zAxis = new THREE.Vector3(0, 0, 1);
 
-    if (keys.a || keys.d) {
-        rad *= (keys.d ? -1 : 1);
-        human.set({ quaternion: [zAxis, human.rotation.z + rad] });
-        options.bearing = -toDeg(human.rotation.z);
-    }
+    // if (keys.a || keys.d) {
+    //     rad *= (keys.d ? -1 : 1);
+    //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
+    //     options.bearing = -toDeg(human.rotation.z);
+    // }
 
-    human.playAnimation(opt);
+    // human.playAnimation(opt);
 
-    map.jumpTo(options);
+    // map.jumpTo(options);
     tb.map.update = true;
 
 }
@@ -402,7 +336,7 @@ if (experimentName != null && experimentName !== "") {
     gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
     // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
     // gama.executor_speed=100;
-    gama.connect(on_connected, on_disconnected);
+    // gama.connect(on_connected, on_disconnected);
 
 }
 function on_connected() {
@@ -522,5 +456,5 @@ function start_renderer() {
         // );
 
         // }
-    }, 1000);
+    }, 5000);
 }
