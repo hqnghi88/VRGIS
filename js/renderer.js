@@ -13,9 +13,9 @@ mapboxgl.accessToken = config.accessToken;
 
 let minZoom = 12;
 var mapConfig = {
-    map: { center: [-73.979681, 40.6974881], zoom: 21, pitch: 69, bearing: 0 },//[105.771453381, 10.022111449]
+    map: { center: [105.771453381, 10.022111449], zoom: 21, pitch: 69, bearing: 0 },//[105.771453381, 10.022111449]
     human: {
-        origin: [-73.979681, 40.6974881],
+        origin: [105.771453381, 10.022111449],
         type: 'glb',
         model: 'models/Soldier',
         scale: 2,

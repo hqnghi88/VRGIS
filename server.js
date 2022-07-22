@@ -44,9 +44,9 @@ server.listen(process.env.PORT || 80, function () {
 io.on('connection', function (socket) {
 
     socket.on('newplayer', function () {
-        console.log("newplayer " + server.lastPlayderID );
-        var xx=-73.979681 + Math.random() / 10000;
-        var yy=40.6974881 + Math.random() / 10000;
+        console.log("newplayer " + server.lastPlayderID );//[105.771453381, 10.022111449]
+        var xx=105.771453381 + Math.random() / 10000;
+        var yy=10.022111449 + Math.random() / 10000;
         socket.player = {
             id: server.lastPlayderID++,
             x:xx ,
