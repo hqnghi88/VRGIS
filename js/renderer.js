@@ -81,7 +81,7 @@ function createCustomLayer(layerName) {
             // }
             // tb.loadObj(options, function (model) {
             //     human = model.setCoords(mapConfig.human.origin);
-                // human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+            // human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
             //     human.addTooltip("Walk with WASD keys", true, human.anchor, true, 2);
             //     human.castShadow = true;
             //     human.selected = true;
@@ -107,7 +107,7 @@ function easing(t) {
     return t * (2 - t);
 }
 
-let velocity = 0.0, speed = 0.0, ds = 0.01; 
+let velocity = 0.0, speed = 0.0, ds = 0.01;
 
 map.on('style.load', function () {
 
@@ -123,9 +123,9 @@ map.on('style.load', function () {
     Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
 });
 
-function travelPath(id,destination) {
+function travelPath(id, destination) {
     var soldier = pple.get(id);
-    if(!soldier) return;
+    if (!soldier) return;
     // console.log(soldier);
     // request directions. See https://docs.mapbox.com/api/navigation/#directions for details
 
@@ -140,19 +140,18 @@ function travelPath(id,destination) {
                 'type': 'Feature',
                 'geometry': {
                     'type': 'LineString',
-                    'coordinates': [gamestate.players[id].ori , destination]
+                    'coordinates': [gamestate.players[id].ori, destination]
                 }
             }
         ]
     };
 
-    let duration = 2000;
+    let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
         animation: 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
-        trackHeading:true,
         duration: duration
     }
 
@@ -169,9 +168,13 @@ function travelPath(id,destination) {
     // 	color: 'steelblue'
     // })
 
+    soldier.playAnimation(options);
     // // start the soldier animation with above options, and remove the line when animation ends
     soldier.followPath(
-    	options 
+        options,
+        function ( ) { 
+            soldier.setCoords(destination);
+        }
     );
     // tb.add(line);
     // function rml() {
@@ -179,11 +182,10 @@ function travelPath(id,destination) {
     // 	tb.remove(line);
     // }
 
-    soldier.playAnimation(options);
 
 
     // set destination as the new origin, for the next trip
-    gamestate.players[id].ori  = destination;
+    gamestate.players[id].ori = destination;
 
     // })
 }
@@ -248,7 +250,7 @@ function init() {
     // stats
     // stats = new Stats();
     // map.getContainer().appendChild(stats.dom);
- 
+
     animate();
 
     // gui
