@@ -107,8 +107,7 @@ function easing(t) {
     return t * (2 - t);
 }
 
-let velocity = 0.0, speed = 0.0, ds = 0.01;
-let keys;
+let velocity = 0.0, speed = 0.0, ds = 0.01; 
 
 map.on('style.load', function () {
 
@@ -249,27 +248,7 @@ function init() {
     // stats
     // stats = new Stats();
     // map.getContainer().appendChild(stats.dom);
-
-    keys = {
-        a: false,
-        s: false,
-        d: false,
-        w: false
-    };
-
-    document.body.addEventListener('keydown', function (e) {
-
-        const key = e.code.replace('Key', '').toLowerCase();
-        if (keys[key] !== undefined)
-            keys[key] = true;
-    });
-    document.body.addEventListener('keyup', function (e) {
-
-        const key = e.code.replace('Key', '').toLowerCase();
-        if (keys[key] !== undefined)
-            keys[key] = false;
-    });
-
+ 
     animate();
 
     // gui
