@@ -9,7 +9,6 @@
 /.vs/
 /.vs/ThreeboxSolution/v16
 /tests/node_modules
-/tests/obj/Debug
-/server.js
+/tests/obj/Debug 
 /ThreeboxSolution.sln
 /ThreeboxSolution/
