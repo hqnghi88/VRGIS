@@ -48,26 +48,27 @@ socket.on('player-remove', (id) => {
 
 var Game = {};
 
-Game.addNewPlayer = function (id, x, y) {
+Game.addNewPlayer = function (id, x, y, o, d) {
     gamestate.players[id] = {
-        x: -73.979681 + Math.random() / 10000,
-        y: 40.6974881 + Math.random() / 10000,
+        x: x,
+        y: y,
+        ori: o,
+        dest: d,
+        // x: -73.979681 + Math.random() / 10000,
+        // y: 40.6974881 + Math.random() / 10000,
         health: 100,
-        username: `Player${Math.floor(Math.random() * 999999)}`,
-        color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+        username: `Player${id}`,
+        color: "#" + Math.floor(id * 16777215).toString(16)
     }
- 
+
     let options = {
         type: mapConfig.human.type, //model type
         obj: mapConfig.human.model + "." + mapConfig.human.type,
 
-        // obj: 'models/Soldier.glb',
-        // type: 'glb',//gltf
-        units: 'meters', // in meters
-        rotation: { x: 90, y: 180, z: 0 },
-        scale: mapConfig.human.scale, //x3 times is real size for this model
-        // rotation: mapConfig.human.rotation, //default rotation
-        anchor: 'top',
+        scale: 2,
+        units: 'meters',
+        rotation: { x: 90, y: 0, z: 0 },
+        anchor: 'center',//default rotation
         clone: false //objects won't be cloned
     }
 
@@ -77,16 +78,16 @@ Game.addNewPlayer = function (id, x, y) {
         var _human1 = model.setCoords([gamestate.players[id].x, gamestate.players[id].y]);
 
         // var _human1 = model.setCoords(mapConfig.human.origin);
-        _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+        // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
         // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
         _human1.castShadow = true;
         _human1.selected = false;
         // human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
         tb.add(_human1);
+        // _human1.playAnimation({ animation: 3, duration: 100000000 });
         pple.set(id, _human1);
-        console.log(pple);
-        // init();
+        init();
         // if (pple.size === 10) {
         //     start_renderer();
         // }
@@ -94,40 +95,23 @@ Game.addNewPlayer = function (id, x, y) {
 };
 
 Game.removePlayer = function (id) {
-    pple.set(id,null);
+    tb.remove(pple.get(id));
+    pple.delete(id);
     delete gamestate.players[id];
 };
-function movePlayer(dir) {
-    // console.log(dir);
-    // socket.emit('move-player', dir);
-    // console.log("end " + dir);
-}
 
-Game.movePlayer = function (id, xx, yy) {
+Game.movePlayer = function (id, dest) {
     // console.log(xx);
-    gamestate.players[id].x = gamestate.players[id].x + xx/1000000; 
-    gamestate.players[id].y = gamestate.players[id].y + yy/1000000;
-    pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
+    // gamestate.players[id].x = gamestate.players[id].x + xx / 1000000;
+    // gamestate.players[id].y = gamestate.players[id].y + yy / 1000000;
+    // pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
 
+    // var pt = [destxx,destyy];
+    travelPath(id, dest);
+    // pple.forEach((human) => { 
+    //     travelPath(human.dest);
+    // });
 };
-document.addEventListener('keydown', (e) => {
-    if (e.key == 'w') {
-        movePlayer('up');
-        Client.socket.emit('click', { x: 0, y: -1 });
-    }
-    if (e.key == 'a') {
-        movePlayer('left');
-        Client.socket.emit('click', { x: 1, y: 0 });
-    }
-    if (e.key == 's') {
-        movePlayer('down');
-        Client.socket.emit('click', { x: 0, y: 1 });
-    }
-    if (e.key == 'd') {
-        movePlayer('right');
-        Client.socket.emit('click', { x: -1, y: 0 });
-    }
-})
-
-
-// renderGame();
+Game.getCoordinates = function (x, y) {
+    Client.sendClick(x, y);
+};

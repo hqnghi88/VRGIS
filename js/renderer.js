@@ -13,15 +13,15 @@ mapboxgl.accessToken = config.accessToken;
 
 let minZoom = 12;
 var mapConfig = {
-    map: { center: [-73.979681, 40.6974881], zoom: 22, pitch: 75, bearing: 38 },//[105.771453381, 10.022111449]
+    map: { center: [-73.979681, 40.6974881], zoom: 21, pitch: 69, bearing: 0 },//[105.771453381, 10.022111449]
     human: {
         origin: [-73.979681, 40.6974881],
         type: 'glb',
         model: 'models/Soldier',
-        // model: 'models/vehicles/car',
-        rotation: { x: 90, y: -90, z: 0 },
         scale: 2,
-        startRotation: { x: 0, y: 0, z: -38 },
+        units: 'meters',
+        rotation: { x: 90, y: 0, z: 0 },
+        anchor: 'center',//default rotation
         date: new Date(2020, 12, 12, 1, 12, 12, 12, 12)
     },
     names: {
@@ -53,11 +53,10 @@ window.tb = new Threebox(
         // enableTooltips: true
     }
 );
-
 // tb.setSunlight(mapConfig.human.date, map.getCenter());
 
 // parameters to ensure the model is georeferenced correctly on the map
-let human;  
+// let human;  
 function createCustomLayer(layerName) {
     let model;
     //create the layer
@@ -65,7 +64,7 @@ function createCustomLayer(layerName) {
         id: layerName,
         type: 'custom',
         renderingMode: '3d',
-        onAdd: function (map, gl) { 
+        onAdd: function (map, gl) {
             Client.askNewPlayer();
             // let options = {
             //     type: mapConfig.human.type, //model type
@@ -82,7 +81,7 @@ function createCustomLayer(layerName) {
             // }
             // tb.loadObj(options, function (model) {
             //     human = model.setCoords(mapConfig.human.origin);
-            //     human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+                // human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
             //     human.addTooltip("Walk with WASD keys", true, human.anchor, true, 2);
             //     human.castShadow = true;
             //     human.selected = true;
@@ -121,7 +120,74 @@ map.on('style.load', function () {
     }
     map.getCanvas().focus();
 
+}).on('click', function (e) {
+    Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
 });
+
+function travelPath(id,destination) {
+    var soldier = pple.get(id);
+    if(!soldier) return;
+    // console.log(soldier);
+    // request directions. See https://docs.mapbox.com/api/navigation/#directions for details
+
+    // var url = "https://api.mapbox.com/directions/v5/mapbox/driving/" + [origin, destination].join(';') + "?geometries=geojson&access_token=" + config.accessToken
+
+
+    // fetchFunction(url, function (data) { 
+    var route = {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [gamestate.players[id].ori , destination]
+                }
+            }
+        ]
+    };
+
+    let duration = 2000;
+    // extract path geometry from callback geojson, and set duration of travel
+    var options = {
+        animation: 3,
+        // path: data.routes[0].geometry.coordinates,
+        path: route.features[0].geometry.coordinates,
+        trackHeading:true,
+        duration: duration
+    }
+
+    // // set up geometry for a line to be added to map, lofting it up a bit for *style*
+    // var lineGeometry = options.path
+    // 	.map(function (coordinate) {
+    // 		return coordinate.concat([0]);
+    // 	})
+
+    // // // create and add line object
+    // line = tb.line({
+    // 	geometry: lineGeometry,
+    // 	width: 5,
+    // 	color: 'steelblue'
+    // })
+
+    // // start the soldier animation with above options, and remove the line when animation ends
+    soldier.followPath(
+    	options 
+    );
+    // tb.add(line);
+    // function rml() {
+    // 	console.log("dsf");
+    // 	tb.remove(line);
+    // }
+
+    soldier.playAnimation(options);
+
+
+    // set destination as the new origin, for the next trip
+    gamestate.players[id].ori  = destination;
+
+    // })
+}
 
 function createCompositeLayer(layerId) {
     let layer = {
@@ -235,60 +301,115 @@ var opt = {
 // mainLoop();
 function animate() {
     // human.playAnimation(opt);
-    pple.forEach((value) => {
-        value.playAnimation({ animation: 3, duration: 100000000 }) ;
-    })
+    // pple.forEach((value) => {
+    //     value.playAnimation({ animation: 3, duration: 100000000 });
+    // })
     requestAnimationFrame(animate);
     // stats.update();
-    // speed = 0.0;
 
-    // if (!(keys.w || keys.s)) {
-    //     if (velocity > 0) { speed = -api.inertia * ds }
-    //     else if (velocity < 0) { speed = api.inertia * ds }
-    //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
-    // }
+    pple.forEach((human) => {
 
-    // if (keys.w)
-    //     speed = api.acceleration * ds;
-    // else if (keys.s)
-    //     speed = -api.acceleration * ds;
+        // speed = 0.0;
 
-    // velocity += (speed - velocity) * api.acceleration * ds;
-    // if (speed == 0.0) {
-    //     velocity = 0;
-    //     return;
-    // }
+        // if (!(keys.w || keys.s)) {
+        //     if (velocity > 0) { speed = -api.inertia * ds }
+        //     else if (velocity < 0) { speed = api.inertia * ds }
+        //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
+        // }
 
-    // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
+        // if (keys.w)
+        //     speed = api.acceleration * ds;
+        // else if (keys.s)
+        //     speed = -api.acceleration * ds;
 
-    // let options = {
-    //     center: human.coordinates,
-    //     bearing: map.getBearing(),
-    //     easing: easing
-    // };
+        // velocity += (speed - velocity) * api.acceleration * ds;
+        // if (speed == 0.0) {
+        //     velocity = 0;
+        //     return;
+        // }
 
-    // function toDeg(rad) {
-    //     return rad / Math.PI * 180;
-    // }
+        // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
 
-    // function toRad(deg) {
-    //     return deg * Math.PI / 180;
-    // }
+        // let options = {
+        //     center: human.coordinates,
+        //     bearing: map.getBearing(),
+        //     easing: easing
+        // };
 
-    // let deg = 1;
-    // let rad = toRad(deg);
-    // let zAxis = new THREE.Vector3(0, 0, 1);
+        // function toDeg(rad) {
+        //     return rad / Math.PI * 180;
+        // }
 
-    // if (keys.a || keys.d) {
-    //     rad *= (keys.d ? -1 : 1);
-    //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
-    //     options.bearing = -toDeg(human.rotation.z);
-    // }
+        // function toRad(deg) {
+        //     return deg * Math.PI / 180;
+        // }
 
-    // human.playAnimation(opt);
+        // let deg = 1;
+        // let rad = toRad(deg);
+        // let zAxis = new THREE.Vector3(0, 0, 1);
 
-    // map.jumpTo(options);
-    tb.map.update = true;
+        // if (keys.a || keys.d) {
+        //     rad *= (keys.d ? -1 : 1);
+        //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
+        //     options.bearing = -toDeg(human.rotation.z);
+        // }
+
+        // human.playAnimation(opt);
+    })
+    if (gamestate) {
+        for (id in gamestate.players) {
+            // let human = pple.get(id); 
+            // speed = 0.0;
+
+            // if (!(keys.w || keys.s)) {
+            //     if (velocity > 0) { speed = -api.inertia * ds }
+            //     else if (velocity < 0) { speed = api.inertia * ds }
+            //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
+            // }
+
+            // if (keys.w)
+            //     speed = api.acceleration * ds;
+            // else if (keys.s)
+            //     speed = -api.acceleration * ds;
+
+            // velocity += (speed - velocity) * api.acceleration * ds;
+            // if (speed == 0.0) {
+            //     velocity = 0;
+            //     return;
+            // }
+
+            // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
+
+            // let options = {
+            //     center: human.coordinates,
+            //     bearing: map.getBearing(),
+            //     easing: easing
+            // };
+
+            // function toDeg(rad) {
+            //     return rad / Math.PI * 180;
+            // }
+
+            // function toRad(deg) {
+            //     return deg * Math.PI / 180;
+            // }
+
+            // let deg = 1;
+            // let rad = toRad(deg);
+            // let zAxis = new THREE.Vector3(0, 0, 1);
+
+            // if (keys.a || keys.d) {
+            //     rad *= (keys.d ? -1 : 1);
+            //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
+            //     options.bearing = -toDeg(human.rotation.z);
+            // }
+
+            // human.playAnimation(opt);
+
+            // map.jumpTo(options);
+        }
+        tb.map.update = true;
+    }
 
 }
 
@@ -434,25 +555,25 @@ function start_renderer() {
         // if (gama.state === "play") {
         // gama.step(
 
-            gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
-                if (typeof message == "object") {
+        gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+            if (typeof message == "object") {
 
-                } else {
-                    geojson = null;
-                    geojson = JSON.parse(message);
-                    // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
+            } else {
+                geojson = null;
+                geojson = JSON.parse(message);
+                // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
 
 
 
-                    geojson.features.forEach((e) => {
-                        // console.log(pple.get(e.properties.name));
-                        if (pple.get(e.properties.name)) {
-                            pple.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-                        }
-                    });
-                    // console.log(pple);
-                }
-            });
+                geojson.features.forEach((e) => {
+                    // console.log(pple.get(e.properties.name));
+                    if (pple.get(e.properties.name)) {
+                        pple.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+                    }
+                });
+                // console.log(pple);
+            }
+        });
         // );
 
         // }
