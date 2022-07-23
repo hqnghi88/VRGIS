@@ -96,6 +96,8 @@ map.on('style.load', function () {
 }).on('click', function (e) {
     // console.log(gamestate.players[main_id].moving);
     // if (gamestate.players[main_id].moving === false) {
+
+
     Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
     // }
 });
@@ -113,14 +115,15 @@ filterInput.addEventListener('keypress', (e) => {
 
 function createLabelIcon(text) {
     let popup = document.createElement('div');
- 
 
-    popup.innerHTML =   '<div title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</div>';
+
+    popup.innerHTML = '<div title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</div>';
     return popup;
 }
 function travelPath(id, destination) {
     var soldier = pple.get(id);
-    if (!soldier) return;
+    if (!soldier) return; 
+    soldier.setCoords(soldier.coordinates);
     gamestate.players[id].moving = true;
     // request directions. See https://docs.mapbox.com/api/navigation/#directions for details
 
@@ -135,12 +138,12 @@ function travelPath(id, destination) {
                 'type': 'Feature',
                 'geometry': {
                     'type': 'LineString',
-                    'coordinates': [gamestate.players[id].ori, destination]
+                    // 'coordinates': [gamestate.players[id].ori, destination]
+                    'coordinates': [soldier.coordinates, destination]
                 }
             }
         ]
     };
-
     let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
@@ -165,14 +168,13 @@ function travelPath(id, destination) {
 
     soldier.playAnimation(options);
 
-    // // start the soldier animation with above options, and remove the line when animation ends
     soldier.followPath(
         options,
         function () {
             console.log(id);
             gamestate.players[id].ori = destination;
 
-            soldier.setCoords(destination);  
+            soldier.setCoords(destination);
 
             // for (iii in gamestate.players) {
             //     pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
@@ -180,15 +182,7 @@ function travelPath(id, destination) {
             gamestate.players[id].moving = false;
         }
     );
-    // tb.add(line);
-    // function rml() {
-    // 	console.log("dsf");
-    // 	tb.remove(line);
-    // }
 
-
-
-    // set destination as the new origin, for the next trip
 
     // })
 }
@@ -199,9 +193,9 @@ function centerSoldier() {
     let opt = {
         // center: [gamestate.players[main_id].x,gamestate.players[main_id].y],
         center: soldier.coordinates,
-        bearing: map.getBearing(),zoom: 20,
+        bearing: map.getBearing(), zoom: 20,
         easing: easing
-    }; 
+    };
     map.jumpTo(opt);
     tb.map.update = true;
 }
@@ -299,7 +293,7 @@ function animate() {
     // human.playAnimation(opt);
     // pple.forEach((value) => {
     //     value.playAnimation({ animation: 3, duration: 100000000 });
-    // })
+    // }) 
     requestAnimationFrame(animate);
     // stats.update(); 
 

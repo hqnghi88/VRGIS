@@ -108,6 +108,9 @@ Game.movePlayer = function (id, dest) {
     // gamestate.players[id].y = gamestate.players[id].y + yy / 1000000;
     // pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
     gamestate.players[id].dest = dest;
+    var soldier = pple.get(id);
+    if (!soldier) return;
+    soldier.setCoords(soldier.coordinates);
     // var pt = [destxx,destyy];
     travelPath(id, dest);
     // pple.forEach((human) => { 
