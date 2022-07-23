@@ -113,7 +113,7 @@ filterInput.addEventListener('keypress', (e) => {
 
 function createLabelIcon(text) {
     let popup = document.createElement('div');
-    popup.innerHTML = '<span title="' + text + '" style="font-size: 12;color: yellow;">'+text+'</span>';
+    popup.innerHTML = '<span title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</span>';
     return popup;
 }
 function travelPath(id, destination) {
@@ -189,7 +189,19 @@ function travelPath(id, destination) {
 
     // })
 }
+function centerSoldier() {
 
+    var soldier = pple.get(main_id);
+    if (!soldier) return;
+    let opt = {
+        // center: [gamestate.players[main_id].x,gamestate.players[main_id].y],
+        center: soldier.coordinates,
+        bearing: map.getBearing(),zoom: 20,
+        easing: easing
+    }; 
+    map.jumpTo(opt);
+    tb.map.update = true;
+}
 function createCompositeLayer(layerId) {
     let layer = {
         'id': layerId,
