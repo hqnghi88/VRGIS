@@ -66,8 +66,9 @@ Game.addNewPlayer = function (id, x, y, o, d) {
     let options = {
         type: mapConfig.human.type, //model type
         obj: mapConfig.human.model + "." + mapConfig.human.type,
-
-        scale: 2,
+        // type:'glb',
+        // obj:"models/untitled.glb",
+        scale: 3,
         units: 'meters',
         rotation: { x: 90, y: 0, z: 0 },
         anchor: 'top',
@@ -80,7 +81,7 @@ Game.addNewPlayer = function (id, x, y, o, d) {
         var _human1 = model.setCoords([gamestate.players[id].x, gamestate.players[id].y]);
 
         // var _human1 = model.setCoords(mapConfig.human.origin);
-        // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+        // _human1.setRotation({ x: -90, y: 0, z: 0 }); //turn it to the initial street way
         // _human1.addTooltip("Player"+id, true, _human1.anchor, true, 2); 
         _human1.addLabel(createLabelIcon("Player" + id), true, _human1.anchor, 1.5);
         _human1.castShadow = true;

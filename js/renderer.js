@@ -35,6 +35,10 @@ var mapConfig = {
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/satellite-streets-v11',
+    // style: "mapbox://styles/notalemesa/ck8dqwdum09ju1ioj65e3ql3k",
+    // style: "mapbox://styles/mapbox/streets-v11?optimize=true",
+    // style: "https://wasac.github.io/mapbox-stylefiles/unvt/style.json",
+
     zoom: mapConfig.map.zoom,
     center: mapConfig.map.center,
     pitch: mapConfig.map.pitch,
@@ -148,9 +152,10 @@ function travelPath(id, destination) {
     let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: 1,
+        animation:1,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
+        // trackHeading:false,
         duration: duration
     }
 
@@ -174,8 +179,8 @@ function travelPath(id, destination) {
         function () {
             // console.log(id);
             gamestate.players[id].ori = destination;
-
             soldier.setCoords(destination);
+            // soldier.playAnimation({ animation:-12, duration: 1 });
 
             // for (iii in gamestate.players) {
             //     pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
