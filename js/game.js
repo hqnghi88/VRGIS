@@ -116,9 +116,9 @@ Game.movePlayer = function (id, dest) {
 };
 Game.showMessage = function (id, m) {
     gamestate.players[id].msg = m;
-    var soldier = pple.get(id);
+    var soldier = pple.get(id);     
     if (!soldier) return;
-    soldier.addLabel(createLabelIcon("Player" + id + "<br/>" + m), true);
+    soldier.addLabel(createLabelIcon("Player" + id + '<br/>'  +m ), true);
     setTimeout(function () { 
         soldier.addLabel(createLabelIcon("Player" + id + "<br/><br/><br/><br/>"), true);
 

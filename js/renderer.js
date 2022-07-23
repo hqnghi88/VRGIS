@@ -106,14 +106,16 @@ filterInput.addEventListener('keypress', (e) => {
         const value = e.target.value.trim().toLowerCase();
 
         Client.sendMessage(value);
-        console.log("send chat " + value);
+        // console.log("send chat " + value);
         filterInput.value = "";
     }
 });
 
 function createLabelIcon(text) {
     let popup = document.createElement('div');
-    popup.innerHTML = '<span title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</span>';
+ 
+
+    popup.innerHTML =   '<div title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</div>';
     return popup;
 }
 function travelPath(id, destination) {
