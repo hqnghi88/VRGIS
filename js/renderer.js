@@ -106,9 +106,10 @@ const filterInput = document.getElementById('filter-input');
 filterInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const value = e.target.value.trim().toLowerCase();
-
-        Client.sendMessage(value);
-        // console.log("send chat " + value);
+        if(value!==""){
+            Client.sendMessage(value);
+            // console.log("send chat " + value);
+        }
         filterInput.value = "";
     }
 });
@@ -117,7 +118,7 @@ function createLabelIcon(text) {
     let popup = document.createElement('div');
 
 
-    popup.innerHTML = '<div title="' + text + '" style="font-size: 12;color: yellow;">' + text + '</div>';
+    popup.innerHTML = '<div title="' + text + '" style="font-size: 12;color: yellow;background-color:gray">' + text + '</div>';
     return popup;
 }
 function travelPath(id, destination) {
@@ -171,7 +172,7 @@ function travelPath(id, destination) {
     soldier.followPath(
         options,
         function () {
-            console.log(id);
+            // console.log(id);
             gamestate.players[id].ori = destination;
 
             soldier.setCoords(destination);

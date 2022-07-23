@@ -55,6 +55,7 @@ Game.addNewPlayer = function (id, x, y, o, d) {
         ori: o,
         dest: d,
         moving: false,
+        msgtimeout: '',
         // x: -73.979681 + Math.random() / 10000,
         // y: 40.6974881 + Math.random() / 10000,
         health: 100,
@@ -81,7 +82,7 @@ Game.addNewPlayer = function (id, x, y, o, d) {
         // var _human1 = model.setCoords(mapConfig.human.origin);
         // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
         // _human1.addTooltip("Player"+id, true, _human1.anchor, true, 2); 
-        _human1.addLabel(createLabelIcon("Player" + id + "<br/><br/><br/><br/>"), true);
+        _human1.addLabel(createLabelIcon("Player" + id), true, _human1.anchor, 1.5);
         _human1.castShadow = true;
         _human1.selected = false;
         // human1.addEventListener('ObjectChanged', onObjectChanged, false);
@@ -108,9 +109,6 @@ Game.movePlayer = function (id, dest) {
     // gamestate.players[id].y = gamestate.players[id].y + yy / 1000000;
     // pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
     gamestate.players[id].dest = dest;
-    var soldier = pple.get(id);
-    if (!soldier) return;
-    soldier.setCoords(soldier.coordinates);
     // var pt = [destxx,destyy];
     travelPath(id, dest);
     // pple.forEach((human) => { 
@@ -118,19 +116,24 @@ Game.movePlayer = function (id, dest) {
     // });
 };
 Game.showMessage = function (id, m) {
-    gamestate.players[id].msg = m;
-    var soldier = pple.get(id);     
-    if (!soldier) return;
-    soldier.addLabel(createLabelIcon("Player" + id + '<br/>'  +m ), true);
-    setTimeout(function () { 
-        soldier.addLabel(createLabelIcon("Player" + id + "<br/><br/><br/><br/>"), true);
+    clearTimeout(gamestate.players[id].msgtimeout);
 
-        soldier.playAnimation({ animation: 3, duration: 1 });
+    gamestate.players[id].msg = m;
+    var soldier = pple.get(id);
+    if (!soldier) return;
+    soldier.addLabel(createLabelIcon("Player" + id + ': ' + m), true, soldier.anchor, 1.5);
+    tb.update();
+    map.triggerRepaint();
+    // soldier.drawLabelHTML();
+    gamestate.players[id].msgtimeout = setTimeout(function () {
+        soldier.addLabel(createLabelIcon("Player" + id), true, soldier.anchor, 1.5);
+        tb.update();
+        map.triggerRepaint();
+
         // tb.update();
     }, 5000);
-    soldier.playAnimation({ animation: 3, duration: 1 });
+    // soldier.playAnimation({ animation: 3, duration: 1 });
     // soldier.addLabel("Player"+id+" "+m, true, soldier.anchor, true, 2);
-    // tb.update();
 
 };
 Game.getCoordinates = function (x, y) {

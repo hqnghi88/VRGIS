@@ -28,7 +28,7 @@ Client.socket.on('newplayer', function (data) {
 });
 Client.socket.on('mainplayer',function(data){
     main_id=data.id; 
-    console.log(main_id);
+    // console.log(main_id);
     // Game.addNewPlayer(data.id,data.x,data.y);
 });
 
