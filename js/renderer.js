@@ -169,13 +169,14 @@ function travelPath(id, destination) {
     soldier.followPath(
         options,
         function () {
+            console.log(id);
             gamestate.players[id].ori = destination;
 
-            // soldier.setCoords(destination);  
+            soldier.setCoords(destination);  
 
-            for (iii in gamestate.players) {
-                pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
-            }
+            // for (iii in gamestate.players) {
+            //     pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
+            // }
             gamestate.players[id].moving = false;
         }
     );
