@@ -3,6 +3,7 @@
  */
 
 var Client = {};
+var main_id;
 Client.socket = io.connect();
 
 Client.sendTest = function () {
@@ -18,17 +19,18 @@ Client.sendClick = function (x, y) {
     Client.socket.emit('click', { x: x, y: y });
 };
 
-var main_id;
-var origin = [-73.979681, 40.6974881];
-var destination, line;
+Client.sendMessage = function (m) {
+    Client.socket.emit('message', { msg: m });
+};
+ 
 Client.socket.on('newplayer', function (data) { 
     Game.addNewPlayer(data.id, data.x, data.y, data.ori, data.dest);
 });
-// Client.socket.on('mainplayer',function(data){
-//     main_id=data.id;
-//     console.log(data);
-//     // Game.addNewPlayer(data.id,data.x,data.y);
-// });
+Client.socket.on('mainplayer',function(data){
+    main_id=data.id; 
+    console.log(main_id);
+    // Game.addNewPlayer(data.id,data.x,data.y);
+});
 
 Client.socket.on('allplayers', function (data) {
     for (var i = 0; i < data.length; i++) {
@@ -38,6 +40,9 @@ Client.socket.on('allplayers', function (data) {
 
     Client.socket.on('move', function (data) {
         Game.movePlayer(data.id, data.dest);
+    });
+    Client.socket.on('chat', function (data) {
+        Game.showMessage(data.id, data.msg);
     });
 
     Client.socket.on('remove', function (id) {

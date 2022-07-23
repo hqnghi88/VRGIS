@@ -11,9 +11,10 @@ mapboxgl.accessToken = config.accessToken;
 
 
 
+var pple = new Map();
 let minZoom = 12;
 var mapConfig = {
-    map: { center: [105.771453381, 10.022111449], zoom: 21, pitch: 69, bearing: 0 },//[105.771453381, 10.022111449]
+    map: { center: [105.771453381, 10.022111449], zoom: 20, pitch: 45, bearing: 0 },//[105.771453381, 10.022111449]
     human: {
         origin: [105.771453381, 10.022111449],
         type: 'glb',
@@ -47,10 +48,10 @@ window.tb = new Threebox(
     {
         defaultLights: true,
         // realSunlight: true,
-        // enableSelectingObjects: true,
-        // enableDraggingObjects: true,
-        // enableRotatingObjects: true,
-        // enableTooltips: true
+        enableSelectingObjects: true,
+        enableDraggingObjects: true,
+        enableRotatingObjects: true,
+        enableTooltips: true
     }
 );
 // tb.setSunlight(mapConfig.human.date, map.getCenter());
@@ -66,33 +67,6 @@ function createCustomLayer(layerName) {
         renderingMode: '3d',
         onAdd: function (map, gl) {
             Client.askNewPlayer();
-            // let options = {
-            //     type: mapConfig.human.type, //model type
-            //     obj: mapConfig.human.model + "." + mapConfig.human.type,
-
-            //     // obj: 'models/Soldier.glb',
-            //     // type: 'glb',//gltf
-            //     units: 'meters', // in meters
-            //     rotation: { x: 90, y: 180, z: 0 },
-            //     scale: mapConfig.human.scale, //x3 times is real size for this model
-            //     // rotation: mapConfig.human.rotation, //default rotation
-            //     anchor: 'top',
-            //     clone: false //objects won't be cloned
-            // }
-            // tb.loadObj(options, function (model) {
-            //     human = model.setCoords(mapConfig.human.origin);
-            // human.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
-            //     human.addTooltip("Walk with WASD keys", true, human.anchor, true, 2);
-            //     human.castShadow = true;
-            //     human.selected = true;
-            //     human.addEventListener('ObjectChanged', onObjectChanged, false);
-            //     tb.lights.dirLight.target = model;
-
-            //     tb.add(human);
-            //     init();
-
-            // });
-
 
         },
         render: function (gl, matrix) {
@@ -120,13 +94,32 @@ map.on('style.load', function () {
     map.getCanvas().focus();
 
 }).on('click', function (e) {
+    // console.log(gamestate.players[main_id].moving);
+    // if (gamestate.players[main_id].moving === false) {
     Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
+    // }
 });
 
+const filterInput = document.getElementById('filter-input');
+filterInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const value = e.target.value.trim().toLowerCase();
+
+        Client.sendMessage(value);
+        console.log("send chat " + value);
+        filterInput.value = "";
+    }
+});
+
+function createLabelIcon(text) {
+    let popup = document.createElement('div');
+    popup.innerHTML = '<span title="' + text + '" style="font-size: 12;color: yellow;">'+text+'</span>';
+    return popup;
+}
 function travelPath(id, destination) {
     var soldier = pple.get(id);
     if (!soldier) return;
-    // console.log(soldier);
+    gamestate.players[id].moving = true;
     // request directions. See https://docs.mapbox.com/api/navigation/#directions for details
 
     // var url = "https://api.mapbox.com/directions/v5/mapbox/driving/" + [origin, destination].join(';') + "?geometries=geojson&access_token=" + config.accessToken
@@ -149,7 +142,7 @@ function travelPath(id, destination) {
     let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: 3,
+        animation: 1,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         duration: duration
@@ -169,11 +162,19 @@ function travelPath(id, destination) {
     // })
 
     soldier.playAnimation(options);
+
     // // start the soldier animation with above options, and remove the line when animation ends
     soldier.followPath(
         options,
-        function ( ) { 
-            soldier.setCoords(destination);
+        function () {
+            gamestate.players[id].ori = destination;
+
+            // soldier.setCoords(destination);  
+
+            for (iii in gamestate.players) {
+                pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
+            }
+            gamestate.players[id].moving = false;
         }
     );
     // tb.add(line);
@@ -185,7 +186,6 @@ function travelPath(id, destination) {
 
 
     // set destination as the new origin, for the next trip
-    gamestate.players[id].ori = destination;
 
     // })
 }
@@ -286,111 +286,10 @@ function animate() {
     //     value.playAnimation({ animation: 3, duration: 100000000 });
     // })
     requestAnimationFrame(animate);
-    // stats.update();
+    // stats.update(); 
 
-    pple.forEach((human) => {
-
-        // speed = 0.0;
-
-        // if (!(keys.w || keys.s)) {
-        //     if (velocity > 0) { speed = -api.inertia * ds }
-        //     else if (velocity < 0) { speed = api.inertia * ds }
-        //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
-        // }
-
-        // if (keys.w)
-        //     speed = api.acceleration * ds;
-        // else if (keys.s)
-        //     speed = -api.acceleration * ds;
-
-        // velocity += (speed - velocity) * api.acceleration * ds;
-        // if (speed == 0.0) {
-        //     velocity = 0;
-        //     return;
-        // }
-
-        // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
-
-        // let options = {
-        //     center: human.coordinates,
-        //     bearing: map.getBearing(),
-        //     easing: easing
-        // };
-
-        // function toDeg(rad) {
-        //     return rad / Math.PI * 180;
-        // }
-
-        // function toRad(deg) {
-        //     return deg * Math.PI / 180;
-        // }
-
-        // let deg = 1;
-        // let rad = toRad(deg);
-        // let zAxis = new THREE.Vector3(0, 0, 1);
-
-        // if (keys.a || keys.d) {
-        //     rad *= (keys.d ? -1 : 1);
-        //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
-        //     options.bearing = -toDeg(human.rotation.z);
-        // }
-
-        // human.playAnimation(opt);
-    })
-    if (gamestate) {
-        for (id in gamestate.players) {
-            // let human = pple.get(id); 
-            // speed = 0.0;
-
-            // if (!(keys.w || keys.s)) {
-            //     if (velocity > 0) { speed = -api.inertia * ds }
-            //     else if (velocity < 0) { speed = api.inertia * ds }
-            //     if (velocity > -0.0008 && velocity < 0.0008) { speed = velocity = 0.0; return; }
-            // }
-
-            // if (keys.w)
-            //     speed = api.acceleration * ds;
-            // else if (keys.s)
-            //     speed = -api.acceleration * ds;
-
-            // velocity += (speed - velocity) * api.acceleration * ds;
-            // if (speed == 0.0) {
-            //     velocity = 0;
-            //     return;
-            // }
-
-            // human.set({ worldTranslate: new THREE.Vector3(0, -velocity, 0) });
-
-            // let options = {
-            //     center: human.coordinates,
-            //     bearing: map.getBearing(),
-            //     easing: easing
-            // };
-
-            // function toDeg(rad) {
-            //     return rad / Math.PI * 180;
-            // }
-
-            // function toRad(deg) {
-            //     return deg * Math.PI / 180;
-            // }
-
-            // let deg = 1;
-            // let rad = toRad(deg);
-            // let zAxis = new THREE.Vector3(0, 0, 1);
-
-            // if (keys.a || keys.d) {
-            //     rad *= (keys.d ? -1 : 1);
-            //     human.set({ quaternion: [zAxis, human.rotation.z + rad] });
-            //     options.bearing = -toDeg(human.rotation.z);
-            // }
-
-            // human.playAnimation(opt);
-
-            // map.jumpTo(options);
-        }
-        tb.map.update = true;
-    }
+    // map.jumpTo(options); 
+    tb.map.update = true;
 
 }
 
@@ -484,7 +383,6 @@ function start_sim() {
     // gama.play();
 }
 
-var pple = new Map();
 function initpeople() {
 
     gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {

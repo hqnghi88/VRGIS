@@ -52,11 +52,13 @@ io.on('connection', function (socket) {
             x:xx ,
             y:yy,
             ori:[xx,yy],
-            dest:[xx,yy]
+            dest:[xx,yy],
+            msg:''
             // x: randomInt(100,400),
             // y: randomInt(100,400)
         }; 
         socket.emit('allplayers', getAllPlayers());
+        socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
 
         socket.on('click', function (data) {
@@ -65,6 +67,12 @@ io.on('connection', function (socket) {
             socket.player.y = data.y;
             socket.player.dest = [data.x, data.y];
             io.emit('move', socket.player);
+        });
+
+        socket.on('message', function (data) {
+            // console.log('click to '+data.x+', '+data.y);
+            socket.player.msg = data.msg; 
+            io.emit('chat', socket.player);
         });
 
         socket.on('disconnect', function () {
