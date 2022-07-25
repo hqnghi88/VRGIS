@@ -73,13 +73,13 @@ function createCustomLayer(layerName) {
         onAdd: function (map, gl) {
             Client.askNewPlayer();
 
-            if (experimentName != null && experimentName !== "") {
-                gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
-                // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
-                // gama.executor_speed=100;
-                gama.connect(on_connected, on_disconnected);
+            // if (experimentName != null && experimentName !== "") {
+            //     gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
+            //     // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
+            //     // gama.executor_speed=100;
+            //     gama.connect(on_connected, on_disconnected);
 
-            }
+            // }
         },
         render: function (gl, matrix) {
             tb.update();
@@ -89,6 +89,10 @@ function createCustomLayer(layerName) {
 
 };
 
+function createRoom() {
+ 
+    Client.createRoom();
+}
 function easing(t) {
     return t * (2 - t);
 }

@@ -5,7 +5,7 @@ var path = require('path');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
-
+var gamalib = require('./GAMA.js');
 app.use(session({
     secret: 'secret',
     resave: true,
@@ -41,25 +41,42 @@ server.listen(process.env.PORT || 80, function () {
     console.log('Listening on ' + server.address().port);
 });
 
+
 io.on('connection', function (socket) {
 
     socket.on('newplayer', function () {
-        console.log("newplayer " + server.lastPlayderID );//[105.771453381, 10.022111449]
-        var xx=105.771453381 + Math.random() / 10000;
-        var yy=10.022111449 + Math.random() / 10000;
+        console.log("newplayer " + server.lastPlayderID);//[105.771453381, 10.022111449]
+        var xx = 105.771453381 + Math.random() / 10000;
+        var yy = 10.022111449 + Math.random() / 10000;
         socket.player = {
             id: server.lastPlayderID++,
-            x:xx ,
-            y:yy,
-            ori:[xx,yy],
-            dest:[xx,yy],
-            msg:''
+            x: xx,
+            y: yy,
+            ori: [xx, yy],
+            dest: [xx, yy],
+            room: [],
+            msg: ''
             // x: randomInt(100,400),
             // y: randomInt(100,400)
-        }; 
+        };
         socket.emit('allplayers', getAllPlayers());
         socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
+
+        var gama = new gamalib.GAMA("ws://localhost:6868/", "", "");
+        socket.on('createRoom', function (data) {
+            gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
+            gama.experimentName = 'main';
+            // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
+            // gama.executor_speed=100;
+            gama.connect(
+                function (e) {
+                    gama.socket_id=e.data;
+                    socket.player.room = [gama.socket_id,gama.exp_id];
+                    io.emit('room', socket.player);
+                }, function () { });
+
+        });
 
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);
@@ -71,11 +88,13 @@ io.on('connection', function (socket) {
 
         socket.on('message', function (data) {
             // console.log('click to '+data.x+', '+data.y);
-            socket.player.msg = data.msg; 
+            socket.player.msg = data.msg;
             io.emit('chat', socket.player);
         });
 
         socket.on('disconnect', function () {
+            gama.wSocket.close();
+            gama = null;
             io.emit('remove', socket.player.id);
         });
     });

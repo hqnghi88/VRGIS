@@ -10,7 +10,9 @@ Client.sendTest = function () {
     console.log("test sent");
     Client.socket.emit('test');
 };
-
+Client.createRoom= function(){
+    Client.socket.emit('createRoom');
+};
 Client.askNewPlayer = function () {
     Client.socket.emit('newplayer');
 };
@@ -38,6 +40,9 @@ Client.socket.on('allplayers', function (data) {
         Game.addNewPlayer(data[i].id, data[i].x, data[i].y, data[i].ori, data[i].dest);
     }
 
+    Client.socket.on('room', function (data) {
+        console.log(data);
+    });
     Client.socket.on('move', function (data) {
         Game.movePlayer(data.id, data.dest);
     });
