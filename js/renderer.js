@@ -89,11 +89,17 @@ function createCustomLayer(layerName) {
 
 };
 
-function createRoom() { 
+function createRoom() {
     Client.createRoom();
 }
-function startGame() { 
-    Client.startGame();
+function startGame() {
+    let s = document.getElementById('room_id').value;
+    let e = document.getElementById('exp_id').value;
+    if (s === "" || e === "") {
+        Client.startGame();
+    } else {
+        start_sim(s, e);
+    }
 }
 function easing(t) {
     return t * (2 - t);
@@ -389,7 +395,7 @@ function animate() {
 var updateSource;
 var modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
 var experimentName = 'main';
-var gama=new GAMA("ws://localhost:6868/", modelPath, experimentName);
+var gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
 var geojson = {
     'type': 'FeatureCollection',
     'features': [
@@ -408,10 +414,10 @@ function on_connected() {
 function on_disconnected() {
     clearInterval(updateSource);
 }
-function start_sim(s,e) {
-    gama.exp_id=e ;
-    gama.socket_id=s;
-        gama.connect(initpeople, on_disconnected);
+function start_sim(s, e) {
+    gama.exp_id = e;
+    gama.socket_id = s;
+    gama.connect(initpeople, on_disconnected);
     // gama.evalExpr("world", function (ee) {
     //     console.log(ee)
     //     if (ee.startsWith("Wrong socket_id or exp_id")) {
@@ -421,7 +427,7 @@ function start_sim(s,e) {
     //         }
     //         );
     //     }else{
-            // initpeople();
+    // initpeople();
     //     }
     // });
     // gama.launch(initpeople);
