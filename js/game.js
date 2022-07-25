@@ -1,12 +1,11 @@
 
-var canvas = document.getElementById("gameCanvas");
-/** @type {CanvasRenderingContext2D} */
-var ctx = canvas.getContext("2d");
+// var canvas = document.getElementById("gameCanvas");
+// /** @type {CanvasRenderingContext2D} */
+// var ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-ctx.fillStyle = "red";
+// canvas.width = window.innerWidth;
+// canvas.height = window.innerHeight;
+// ctx.fillStyle = "red";
 var socket = io();
 
 var gamestate = {
@@ -83,10 +82,11 @@ Game.addNewPlayer = function (id, x, y, o, d) {
         // var _human1 = model.setCoords(mapConfig.human.origin);
         // _human1.setRotation({ x: -90, y: 0, z: 0 }); //turn it to the initial street way
         // _human1.addTooltip("Player"+id, true, _human1.anchor, true, 2); 
-        _human1.addLabel(createLabelIcon("Player" + id), true, _human1.anchor, 1.5);
+        _human1.addLabel(createLabelIcon("Player" + id), true);//, _human1.anchor, 1.5);
         _human1.castShadow = true;
         _human1.selected = false;
-        // human1.addEventListener('ObjectChanged', onObjectChanged, false);
+
+        _human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
         tb.add(_human1);
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
@@ -122,12 +122,12 @@ Game.showMessage = function (id, m) {
     gamestate.players[id].msg = m;
     var soldier = pple.get(id);
     if (!soldier) return;
-    soldier.addLabel(createLabelIcon("Player" + id + ': ' + m), true, soldier.anchor, 1.5);
+    soldier.addLabel(createLabelIcon("Player" + id + ': ' + m), true);//, soldier.anchor, 1.5);
     tb.update();
     map.triggerRepaint();
     // soldier.drawLabelHTML();
     gamestate.players[id].msgtimeout = setTimeout(function () {
-        soldier.addLabel(createLabelIcon("Player" + id), true, soldier.anchor, 1.5);
+        soldier.addLabel(createLabelIcon("Player" + id), true);//, soldier.anchor, 1.5);
         tb.update();
         map.triggerRepaint();
 

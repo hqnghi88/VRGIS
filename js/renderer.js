@@ -12,6 +12,7 @@ mapboxgl.accessToken = config.accessToken;
 
 
 var pple = new Map();
+var creep = new Map();
 let minZoom = 12;
 var mapConfig = {
     map: { center: [105.771453381, 10.022111449], zoom: 20, pitch: 45, bearing: 0 },//[105.771453381, 10.022111449]
@@ -53,9 +54,9 @@ window.tb = new Threebox(
         defaultLights: true,
         // realSunlight: true,
         enableSelectingObjects: true,
-        enableDraggingObjects: true,
-        enableRotatingObjects: true,
-        enableTooltips: true
+        // enableDraggingObjects: true,
+        // enableRotatingObjects: true,
+        // enableTooltips: true
     }
 );
 // tb.setSunlight(mapConfig.human.date, map.getCenter());
@@ -72,6 +73,13 @@ function createCustomLayer(layerName) {
         onAdd: function (map, gl) {
             Client.askNewPlayer();
 
+            if (experimentName != null && experimentName !== "") {
+                gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
+                // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
+                // gama.executor_speed=100;
+                gama.connect(on_connected, on_disconnected);
+
+            }
         },
         render: function (gl, matrix) {
             tb.update();
@@ -97,20 +105,22 @@ map.on('style.load', function () {
     }
     map.getCanvas().focus();
 
-}).on('click', function (e) {
-    // console.log(gamestate.players[main_id].moving);
-    // if (gamestate.players[main_id].moving === false) {
+})
+    .on('click', function (e) {
+        // console.log(gamestate.players[main_id].moving);
+        // if (gamestate.players[main_id].moving === false) {
 
 
-    Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
-    // }
-});
+        Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
+        // }
+    })
+    ;
 
 const filterInput = document.getElementById('filter-input');
 filterInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const value = e.target.value.trim().toLowerCase();
-        if(value!==""){
+        if (value !== "") {
             Client.sendMessage(value);
             // console.log("send chat " + value);
         }
@@ -127,7 +137,7 @@ function createLabelIcon(text) {
 }
 function travelPath(id, destination) {
     var soldier = pple.get(id);
-    if (!soldier) return; 
+    if (!soldier) return;
     soldier.setCoords(soldier.coordinates);
     gamestate.players[id].moving = true;
     // request directions. See https://docs.mapbox.com/api/navigation/#directions for details
@@ -152,7 +162,7 @@ function travelPath(id, destination) {
     let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation:1,
+        animation: 1,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
@@ -191,6 +201,66 @@ function travelPath(id, destination) {
 
 
     // })
+}
+
+
+function onObjectChanged(e) {
+    let model = e.detail.object; //here's the object already modified
+    if (api.buildings) {
+        let c = model.coordinates;
+        let point = map.project(c);
+
+        var bbox = [[point.x - 5, point.y - 5], [point.x + 5, point.y + 5]];
+        var features = map.queryRenderedFeatures(bbox, { layers: ['3d-model'] });
+        // let features = map.queryRenderedFeatures(point, { layers: ["3d-model"] });
+        if (features.length > 0) {
+            light(features[0]); // crash!
+        }
+    }
+}
+
+function light(feature) {
+    console.log(feature);
+    fHover = feature;
+    map.setFeatureState({
+        source: fHover.source,
+        sourceLayer: fHover.sourceLayer,
+        id: fHover.id
+    }, { select: true });
+}
+
+function creepPath(id, destination) {
+    var soldier = creep.get(id);
+    if (!soldier) return;
+    soldier.setCoords(soldier.coordinates);
+    var route = {
+        'type': 'FeatureCollection',
+        'features': [
+            {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': [soldier.coordinates, destination]
+                }
+            }
+        ]
+    };
+    let duration = 5000;
+    var options = {
+        animation: 0,
+        // path: data.routes[0].geometry.coordinates,
+        path: route.features[0].geometry.coordinates,
+        trackHeading: true,
+        duration: duration
+    }
+    soldier.playAnimation(options);
+
+    soldier.followPath(
+        options,
+        function () {
+            soldier.setCoords(destination);
+        }
+    );
 }
 function centerSoldier() {
 
@@ -308,28 +378,6 @@ function animate() {
 
 }
 
-function onObjectChanged(e) {
-    let model = e.detail.object; //here's the object already modified
-    if (api.buildings) {
-        let c = model.coordinates;
-        let point = map.project(c);
-        let features = map.queryRenderedFeatures(point, { layers: [mapConfig.names.compositeLayer] });
-        if (features.length > 0) {
-            light(features[0]); // crash!
-        }
-    }
-}
-
-function light(feature) {
-    fHover = feature;
-    map.setFeatureState({
-        source: fHover.source,
-        sourceLayer: fHover.sourceLayer,
-        id: fHover.id
-    }, { select: true });
-}
-
-
 
 
 var updateSource;
@@ -348,13 +396,6 @@ var geojson = {
         }
     ]
 };
-if (experimentName != null && experimentName !== "") {
-    gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
-    // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
-    // gama.executor_speed=100;
-    // gama.connect(on_connected, on_disconnected);
-
-}
 function on_connected() {
     start_sim();
 }
@@ -362,10 +403,20 @@ function on_disconnected() {
     clearInterval(updateSource);
 }
 function start_sim() {
-    gama.launch(() => {
-        initpeople();
-    }
-    );
+    gama.exp_id="5" ;
+    gama.socket_id="533520111";
+    gama.evalExpr("world", function (ee) {
+        console.log(ee)
+        if (ee.startsWith("Wrong socket_id or exp_id")) {
+            gama.launch(() => {
+                console.log(gama.exp_id+" "+gama.socket_id);  
+                initpeople(); 
+            }
+            );
+        }else{
+            initpeople();
+        }
+    });
     // gama.launch(initpeople);
     // gama.evalExpr("\"\"+CRS_transform(world.shape.points[1],\"EPSG:4326\")+\",\"+CRS_transform(world.shape.points[3],\"EPSG:4326\")", function (ee) {
     // 	ee = JSON.parse(ee).result.replace(/[{}]/g, "").replace(/['"]+/g, '');
@@ -409,34 +460,35 @@ function initpeople() {
             // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
 
 
-            let options = {
-                type: mapConfig.human.type, //model type
-                obj: mapConfig.human.model + "." + mapConfig.human.type,
-
-                // obj: 'models/Soldier.glb',
-                // type: 'glb',//gltf
-                units: 'meters', // in meters
-                rotation: { x: 90, y: 180, z: 0 },
-                scale: mapConfig.human.scale, //x3 times is real size for this model
-                // rotation: mapConfig.human.rotation, //default rotation
+            let creep_options = {
+                // type: mapConfig.human.type, //model type
+                // obj: mapConfig.human.model + "." + mapConfig.human.type,
+                type: 'glb',
+                obj: "models/untitled.glb",
+                scale: 2,
+                units: 'meters',
+                rotation: { x: 90, y: 0, z: 0 },
                 anchor: 'top',
                 clone: false //objects won't be cloned
             }
             geojson.features.forEach((e) => {
                 // console.log(e); 
-                tb.loadObj(options, function (model) {
+                tb.loadObj(creep_options, function (model) {
                     var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-                    _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+
+                    _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
+                    // console.log(mapConfig.human);
+                    // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
                     // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
                     _human1.castShadow = true;
                     _human1.selected = false;
                     // human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
                     tb.add(_human1);
-                    pple.set(e.properties.name, _human1);
+                    creep.set(e.properties.name, _human1);
                     // console.log(pple);
                     // init();
-                    if (pple.size === 10) {
+                    if (creep.size === 10) {
                         start_renderer();
                     }
                 });
@@ -461,8 +513,11 @@ function start_renderer() {
 
                 geojson.features.forEach((e) => {
                     // console.log(pple.get(e.properties.name));
-                    if (pple.get(e.properties.name)) {
-                        pple.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+                    if (creep.get(e.properties.name)) {
+                        var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
+                        // var pt = [destxx,destyy];
+                        creepPath(e.properties.name, dest);
+                        // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
                     }
                 });
                 // console.log(pple);

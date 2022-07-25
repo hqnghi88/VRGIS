@@ -38,6 +38,7 @@ class GAMA {
                 this.req = this.queue.shift();
                 this.req.exp_id = this.exp_id;
                 this.req.socket_id = this.socket_id;
+                // console.log(this.req);
                 this.wSocket.send(JSON.stringify(this.req));
                 // console.log("request " + JSON.stringify(this.req));
                 if (this.logger) { this.logger("request " + JSON.stringify(this.req)); }
@@ -119,8 +120,8 @@ class GAMA {
             if (result.exp_id) myself.exp_id = result.exp_id;
             if (result.socket_id) myself.socket_id = result.socket_id;
             
-            if(c) c();
-            // myself.play(c); 
+            // if(c) c();
+            myself.play(c); 
         });
     }
     play(c) {
