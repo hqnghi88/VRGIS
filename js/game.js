@@ -116,6 +116,15 @@ Game.movePlayer = function (id, dest) {
     //     travelPath(human.dest);
     // });
 };
+
+Game.showRoom = function (data) { 
+    document.getElementById('room_id').value=data.room[0];
+}
+Game.startGame = function (data) {  
+    document.getElementById('room_id').value=data.room[0];
+    document.getElementById('exp_id').value=data.room[1];
+    start_sim(data.room[0],data.room[1]);
+}
 Game.showMessage = function (id, m) {
     clearTimeout(gamestate.players[id].msgtimeout);
 

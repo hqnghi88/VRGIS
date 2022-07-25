@@ -89,9 +89,11 @@ function createCustomLayer(layerName) {
 
 };
 
-function createRoom() {
- 
+function createRoom() { 
     Client.createRoom();
+}
+function startGame() { 
+    Client.startGame();
 }
 function easing(t) {
     return t * (2 - t);
@@ -387,7 +389,7 @@ function animate() {
 var updateSource;
 var modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
 var experimentName = 'main';
-var gama;
+var gama=new GAMA("ws://localhost:6868/", modelPath, experimentName);
 var geojson = {
     'type': 'FeatureCollection',
     'features': [
@@ -406,21 +408,22 @@ function on_connected() {
 function on_disconnected() {
     clearInterval(updateSource);
 }
-function start_sim() {
-    gama.exp_id="5" ;
-    gama.socket_id="533520111";
-    gama.evalExpr("world", function (ee) {
-        console.log(ee)
-        if (ee.startsWith("Wrong socket_id or exp_id")) {
-            gama.launch(() => {
-                console.log(gama.exp_id+" "+gama.socket_id);  
-                initpeople(); 
-            }
-            );
-        }else{
-            initpeople();
-        }
-    });
+function start_sim(s,e) {
+    gama.exp_id=e ;
+    gama.socket_id=s;
+        gama.connect(initpeople, on_disconnected);
+    // gama.evalExpr("world", function (ee) {
+    //     console.log(ee)
+    //     if (ee.startsWith("Wrong socket_id or exp_id")) {
+    //         gama.launch(() => {
+    //             console.log(gama.exp_id+" "+gama.socket_id);  
+    //             initpeople(); 
+    //         }
+    //         );
+    //     }else{
+            // initpeople();
+    //     }
+    // });
     // gama.launch(initpeople);
     // gama.evalExpr("\"\"+CRS_transform(world.shape.points[1],\"EPSG:4326\")+\",\"+CRS_transform(world.shape.points[3],\"EPSG:4326\")", function (ee) {
     // 	ee = JSON.parse(ee).result.replace(/[{}]/g, "").replace(/['"]+/g, '');
@@ -456,7 +459,7 @@ function start_sim() {
 function initpeople() {
 
     gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
-        if (typeof event.data == "object") {
+        if (typeof message == "object") {
 
         } else {
             geojson = null;
@@ -476,7 +479,6 @@ function initpeople() {
                 clone: false //objects won't be cloned
             }
             geojson.features.forEach((e) => {
-                // console.log(e); 
                 tb.loadObj(creep_options, function (model) {
                     var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
 

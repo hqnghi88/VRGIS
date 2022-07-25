@@ -7,7 +7,7 @@ class GAMA {
     socket_id = 0;
     exp_id = 0;
     wSocket;
-    state="";
+    state = "";
     queue = [];
     req = "";
     result = "";
@@ -46,9 +46,11 @@ class GAMA {
                 this.wSocket.onmessage = function (event) {
                     // console.log(myself.req);
                     if (event.data instanceof Blob) { } else {
+
+                    // if (typeof event.data != "object") {
                         if (myself.req.callback) {
                             myself.req.callback(event.data);
-                        } 
+                        }
                         myself.endRequest();
                     }
                 };
@@ -113,39 +115,39 @@ class GAMA {
     launch(c) {
         this.queue.length = 0;
         var myself = this;
-        this.state="launch";
+        this.state = "launch";
         this.execute(this.state, function (e) {
             // console.log(e);
             var result = JSON.parse(e);
             if (result.exp_id) myself.exp_id = result.exp_id;
             if (result.socket_id) myself.socket_id = result.socket_id;
-            
+
             // if(c) c();
-            myself.play(c); 
+            myself.play(c);
         });
     }
     play(c) {
         // this.queue.length = 0;
-        this.state="play";
-        this.execute(this.state,c); 
+        this.state = "play";
+        this.execute(this.state, c);
     }
 
     pause(c) {
         // this.queue.length = 0;
-        this.state="pause";
-        this.execute(this.state,c);
+        this.state = "pause";
+        this.execute(this.state, c);
     }
 
     step(c) {
         // this.queue.length = 0;
-        this.state="step";
-        this.execute(this.state,c); 
+        this.state = "step";
+        this.execute(this.state, c);
     }
 
 
     reload(c) {
         // this.queue.length = 0;
-        this.state="reload";
+        this.state = "reload";
         this.execute(this.state);
         if (c) c();
     }

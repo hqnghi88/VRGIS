@@ -22,15 +22,18 @@
 		</div>
 	</div>
 	<div class="filter-ctrl">
+		<input id="room-input" type="button" value="Create Room" style="width: 100px;" onclick="createRoom()">
+		<input id="room-start" type="button" value="Start" style="width: 100px;"  onclick="startGame()"> 
+		<div></div>
+		<input id="room_id" type="text" name="room_id"  style="width: 70px;"  disabled> 
+		<input id="exp_id" type="text" name="exp_id"  style="width: 70px;"  disabled>  
+		<div></div>
 		<input id="filter-center" type="button" value="[   ]" style="width: 40px;" onclick="centerSoldier()">
-		<input id="filter-input" type="text" name="filter" placeholder="Chatbox">
-		<div>
-			<input id="filter-input" type="button" value="Create Room"  onclick="centerSoldier()">
-		</div>
+		<input id="filter-input" type="text" name="filter" placeholder="Chatbox"> 
 	</div>
  
 	</canvas>
-	<script src="js/GAMA.js" type="text/javascript"></script>
+	<script src="js/GAMAfront.js" type="text/javascript"></script>
 	<script src="js/client.js" type="text/javascript"></script>
 	<script src="js/game.js" type="text/javascript"></script>
 	<script src="js/renderer.js" type="text/javascript"></script>

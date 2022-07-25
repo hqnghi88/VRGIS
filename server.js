@@ -65,8 +65,8 @@ io.on('connection', function (socket) {
 
         var gama = new gamalib.GAMA("ws://localhost:6868/", "", "");
         socket.on('createRoom', function (data) {
-            gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
-            gama.experimentName = 'main';
+            // gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
+            // gama.experimentName = 'main';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
             // gama.executor_speed=100;
             gama.connect(
@@ -74,6 +74,19 @@ io.on('connection', function (socket) {
                     gama.socket_id=e.data;
                     socket.player.room = [gama.socket_id,gama.exp_id];
                     io.emit('room', socket.player);
+                }, function () { });
+
+        });
+        socket.on('startGame', function (data) {
+            gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
+            gama.experimentName = 'main';
+            // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
+            // gama.executor_speed=100;
+            gama.launch(
+                function (e) { 
+                    // console.log(e);
+                    socket.player.room = [gama.socket_id,gama.exp_id];
+                    io.emit('started', socket.player);
                 }, function () { });
 
         });
@@ -93,7 +106,9 @@ io.on('connection', function (socket) {
         });
 
         socket.on('disconnect', function () {
-            gama.wSocket.close();
+            if(gama.wSocket){
+                gama.wSocket.close();
+            }
             gama = null;
             io.emit('remove', socket.player.id);
         });

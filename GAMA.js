@@ -1,4 +1,3 @@
-
 const WebSocket = require('ws');
 class GAMA {
     host = "";
@@ -45,8 +44,7 @@ class GAMA {
                         if (this.logger) { this.logger("request " + JSON.stringify(this.req)); }
                         var myself = this;
                         this.wSocket.onmessage = function (event) {
-                            // console.log(myself.req);
-                            if (event.data instanceof Blob) { } else {
+                            if (typeof event.data != "object") {
                                 if (myself.req.callback) {
                                     myself.req.callback(event.data);
                                 }
