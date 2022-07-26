@@ -55,6 +55,8 @@ io.on('connection', function (socket) {
             ori: [xx, yy],
             dest: [xx, yy],
             room: [],
+            roomloc: [],
+            creep: '',
             msg: ''
             // x: randomInt(100,400),
             // y: randomInt(100,400)
@@ -63,31 +65,81 @@ io.on('connection', function (socket) {
         socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
 
-        var gama = new gamalib.GAMA("ws://localhost:6868/", "", "");
+        var gama;//= new gamalib.GAMA("ws://localhost:6868/", "", "");
+        var updateSource;
         socket.on('createRoom', function (data) {
             // gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
             // gama.experimentName = 'main';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
             // gama.executor_speed=100;
+
+            clearInterval(updateSource);
+            if (gama && gama.wSocket) {
+                gama.wSocket.close();
+            }
+            gama = null;
+            gama = new gamalib.GAMA("ws://localhost:6868/", "", "");
             gama.connect(
                 function (e) {
-                    gama.socket_id=e.data;
-                    socket.player.room = [gama.socket_id,gama.exp_id];
+                    gama.socket_id = e.data;
+                    socket.player.room = [gama.socket_id, gama.exp_id];
                     io.emit('room', socket.player);
                 }, function () { });
 
         });
+        socket.on('closeRoom', function (data) {
+            clearInterval(updateSource);
+            if (gama && gama.wSocket) {
+                gama.wSocket.close();
+            }
+            gama = null;
+            io.emit('exitRoom', socket.player.id);
+        });
         socket.on('startGame', function (data) {
-            gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
-            gama.experimentName = 'main';
+            // gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
+            // gama.experimentName = 'main';
+
+
+            console.log("gama of " + gama);
+            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            gama.experimentName = 'road_traffic';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
             // gama.executor_speed=100;
             gama.launch(
-                function (e) { 
+                function (e) {
                     // console.log(e);
-                    socket.player.room = [gama.socket_id,gama.exp_id];
-                    io.emit('started', socket.player);
+                    gama.evalExpr("CRS_transform(world.location,\"EPSG:4326\")", function (ee) {
+                        // console.log(ee);
+                        ee = JSON.parse(ee).result.replace(/[{}]/g, "");
+                        var eee = ee.split(",");
+                        socket.player.room = [gama.socket_id, gama.exp_id];
+                        socket.player.roomloc = [eee[0], eee[1]];
+
+                        socket.player.x = eee[0];
+                        socket.player.y = eee[1];
+                        socket.player.dest = [eee[0], eee[1]];
+                        io.emit('started', socket.player);
+                    });
+
                 }, function () { });
+
+            console.log("updateSource of " + socket.player.id);
+            updateSource = setInterval(() => {
+                // if (gama.state === "play") {
+                // gama.step(
+
+                gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+                    if (typeof message == "object") {
+
+                    } else {
+                        socket.player.creep = JSON.parse(message);
+                        io.emit('allCreep', socket.player);
+                    }
+                });
+                // );
+
+                // }
+            }, 10000);
 
         });
 
@@ -106,7 +158,8 @@ io.on('connection', function (socket) {
         });
 
         socket.on('disconnect', function () {
-            if(gama.wSocket){
+            clearInterval(updateSource);
+            if (gama && gama.wSocket) {
                 gama.wSocket.close();
             }
             gama = null;

@@ -49,6 +49,9 @@ Client.socket.on('allplayers', function (data) {
     Client.socket.on('started', function (data) { 
         Game.startGame(data);
     });
+    Client.socket.on('allCreep', function (data) {  
+        Game.allCreep(data);
+    });
     Client.socket.on('move', function (data) {
         Game.movePlayer(data.id, data.dest);
     });

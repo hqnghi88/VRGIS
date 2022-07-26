@@ -392,10 +392,10 @@ function animate() {
 
 
 
-var updateSource;
-var modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
-var experimentName = 'main';
-var gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
+// var updateSource;
+// var modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
+// var experimentName = 'main';
+// var gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
 var geojson = {
     'type': 'FeatureCollection',
     'features': [
@@ -415,9 +415,9 @@ function on_disconnected() {
     clearInterval(updateSource);
 }
 function start_sim(s, e) {
-    gama.exp_id = e;
-    gama.socket_id = s;
-    gama.connect(initpeople, on_disconnected);
+    // gama.exp_id = e;
+    // gama.socket_id = s;
+    // gama.connect(initpeople, on_disconnected);
     // gama.evalExpr("world", function (ee) {
     //     console.log(ee)
     //     if (ee.startsWith("Wrong socket_id or exp_id")) {
@@ -461,6 +461,48 @@ function start_sim(s, e) {
 
     // gama.play();
 }
+    var creep_options = {
+        // type: mapConfig.human.type, //model type
+        // obj: mapConfig.human.model + "." + mapConfig.human.type,
+        type: 'glb',
+        obj: "models/untitled.glb",
+        scale: 2,
+        units: 'meters',
+        rotation: { x: 90, y: 0, z: 0 },
+        anchor: 'top',
+        clone: false //objects won't be cloned
+    }
+function showCreep(geojson) {
+    geojson.features.forEach((e) => {
+        // console.log(pple.get(e.properties.name));
+        if (creep.get(e.properties.name)) {
+            var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
+            // var pt = [destxx,destyy];
+            creepPath(e.properties.name, dest);
+            // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+        } else {
+            tb.loadObj(creep_options, function (model) {
+                var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+
+                _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
+                // console.log(mapConfig.human);
+                // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+                // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
+                _human1.castShadow = true;
+                _human1.selected = false;
+                // human1.addEventListener('ObjectChanged', onObjectChanged, false);
+
+                tb.add(_human1);
+                creep.set(e.properties.name, _human1);
+                // console.log(pple);
+                // init();
+                // if (creep.size === 10) {
+                //     start_renderer();
+                // }
+            });
+        }
+    });
+}
 
 function initpeople() {
 
@@ -473,17 +515,6 @@ function initpeople() {
             // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
 
 
-            let creep_options = {
-                // type: mapConfig.human.type, //model type
-                // obj: mapConfig.human.model + "." + mapConfig.human.type,
-                type: 'glb',
-                obj: "models/untitled.glb",
-                scale: 2,
-                units: 'meters',
-                rotation: { x: 90, y: 0, z: 0 },
-                anchor: 'top',
-                clone: false //objects won't be cloned
-            }
             geojson.features.forEach((e) => {
                 tb.loadObj(creep_options, function (model) {
                     var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);

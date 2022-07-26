@@ -120,9 +120,17 @@ Game.movePlayer = function (id, dest) {
 Game.showRoom = function (data) { 
     document.getElementById('room_id').value=data.room[0];
 }
+Game.allCreep = function (data) { 
+    showCreep(data.creep);
+}
 Game.startGame = function (data) {  
     document.getElementById('room_id').value=data.room[0];
     document.getElementById('exp_id').value=data.room[1];
+    
+    pple.forEach((human) => { 
+        human.setCoords(data.roomloc);
+    });
+    centerSoldier();
     start_sim(data.room[0],data.room[1]);
 }
 Game.showMessage = function (id, m) {
