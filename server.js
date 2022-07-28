@@ -43,6 +43,7 @@ app.get('/home', function (request, response) {
 server.lastPlayderID = 0;
 
 server.listen(process.env.PORT || 80, function () {
+    console.log('Version '+HEROKU_RELEASE_VERSION);
     console.log('Listening on ' + server.address().port);
 });
 
