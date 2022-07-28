@@ -3,8 +3,8 @@ var session = require('express-session');
 var bodyParser = require('body-parser');
 var path = require('path');
 var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io').listen(server);
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
 var gamalib = require('./GAMA.js');
 app.use(session({
     secret: 'secret',
@@ -57,9 +57,9 @@ server.listen(process.env.PORT || 80, function () {
 });
 
 
+var players =new Map();
 io.on('connection', function (socket) {
-
-    socket.on('newplayer', function () {
+    socket.on('newplayer', function () { 
         console.log("newplayer " + server.lastPlayderID);//[105.771453381, 10.022111449]
         var xx = 105.771453381 + Math.random() / 10000;
         var yy = 10.022111449 + Math.random() / 10000;
@@ -76,6 +76,7 @@ io.on('connection', function (socket) {
             // x: randomInt(100,400),
             // y: randomInt(100,400)
         };
+        players.set(socket.player.id,socket.player);
         socket.emit('allplayers', getAllPlayers());
         socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
@@ -187,6 +188,7 @@ io.on('connection', function (socket) {
                 gama.wSocket.close();
             }
             gama = null;
+            players.delete(socket.player.id); 
             io.emit('remove', socket.player.id);
         });
     });
@@ -197,12 +199,17 @@ io.on('connection', function (socket) {
 });
 
 function getAllPlayers() {
-    var players = [];
-    Object.keys(io.sockets.connected).forEach(function (socketID) {
-        var player = io.sockets.connected[socketID].player;
-        if (player) players.push(player);
-    });
-    return players;
+
+    //     // io.sockets.forEach(function (socketID) {
+    //     //     var player = io.sockets.connected[socketID].player;
+    //     //     if (player) players.push(player);
+    //     // });
+    //     io.sockets.sockets.forEach(function (s) {
+    //         console.log("xxxx "+s.player);
+    //         var player = s.player;
+    //         if (player) players.push(player);
+    //     }); 
+    return  Array.from(players.values()) ;
 }
 
 function randomInt(low, high) {
