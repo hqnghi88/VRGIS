@@ -4,7 +4,7 @@
 
 var Client = {};
 var main_id;
-Client.socket = io.connect("https://vr-gis.herokuapp.com");
+Client.socket = io.connect('/');
 
 Client.sendTest = function () {
     console.log("test sent");

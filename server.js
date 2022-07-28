@@ -21,6 +21,11 @@ app.use('/models', express.static(path.join(path.join(__dirname, 'examples'), 'm
 app.use('/js', express.static(__dirname + '/js'));
 // app.use('/assets',express.static(__dirname + '/assets'));
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+  });
 app.get('/', function (request, response) {
     response.sendFile(path.join(__dirname + '/examples/20-game.html'));
 });
