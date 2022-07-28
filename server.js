@@ -42,6 +42,9 @@ app.get('/home', function (request, response) {
 
 server.lastPlayderID = 0;
 const app_version=process.env.HEROKU_RELEASE_VERSION;
+myObject = { app_version };
+
+this.injectString = JSON.stringify( myObject ).replace(/\\/g, '\\\\').replace(/"/g, '\\\"')
 server.listen(process.env.PORT || 80, function () {
     console.log('Version '+app_version);
     console.log('Listening on ' + server.address().port);

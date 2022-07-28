@@ -13,7 +13,7 @@
 
 </head>
 
-<body><script>console.log(app_version);</script>
+<body><script>console.log(JSON.parse("<%- @injectString %>"));</script>
 	<div id='map' class='map'>
 		<div class="mapboxgl-ctrl helpDiv">
 			<div id="help" class="help">
