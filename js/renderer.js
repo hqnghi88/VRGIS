@@ -98,7 +98,21 @@ function startGame() {
     if (s === "" || e === "") {
         Client.startGame();
     } else {
+        Client.joinGame([s,e]);
         start_sim(s, e);
+    }
+}
+function exitGame() {
+    let s = document.getElementById('room_id').value;
+    let e = document.getElementById('exp_id').value;
+    if (s === "" || e === "") { 
+    } else {
+        Client.leaveGame([s,e]); 
+        
+        creep.forEach((value) => {
+            tb.remove(value); 
+        }) 
+        creep=new Map();
     }
 }
 function easing(t) {

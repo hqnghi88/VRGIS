@@ -118,7 +118,8 @@ io.on('connection', function (socket) {
                         socket.player.x = eee[0];
                         socket.player.y = eee[1];
                         socket.player.dest = [eee[0], eee[1]];
-                        io.emit('started', socket.player);
+                        socket.join(socket.player.room[0]+""+socket.player.room[1]);
+                        io.sockets.in(socket.player.room[0]+""+socket.player.room[1]).emit('started', socket.player);
                     });
 
                 }, function () { });
@@ -133,7 +134,7 @@ io.on('connection', function (socket) {
 
                     } else {
                         socket.player.creep = JSON.parse(message);
-                        io.emit('allCreep', socket.player);
+                        io.sockets.in(socket.player.room[0]+""+socket.player.room[1]).emit('allCreep', socket.player);
                     }
                 });
                 // );
@@ -143,6 +144,12 @@ io.on('connection', function (socket) {
 
         });
 
+        socket.on('joinGame', function (data) { 
+            socket.join(data[0]+""+data[1]);
+        });
+        socket.on('leaveGame', function (data) { 
+            socket.leave(data[0]+""+data[1]);
+        });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);
             socket.player.x = data.x;

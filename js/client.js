@@ -13,6 +13,12 @@ Client.sendTest = function () {
 Client.startGame= function(){
     Client.socket.emit('startGame');
 };
+Client.joinGame= function(data){
+    Client.socket.emit('joinGame',data);
+};
+Client.leaveGame= function(data){
+    Client.socket.emit('leaveGame',data);
+};
 Client.createRoom= function(){
     Client.socket.emit('createRoom');
 };
@@ -45,6 +51,9 @@ Client.socket.on('allplayers', function (data) {
 
     Client.socket.on('room', function (data) { 
         Game.showRoom(data);
+    });
+    Client.socket.on('exitRoom', function (data) { 
+        Game.exitRoom(data);
     });
     Client.socket.on('started', function (data) { 
         Game.startGame(data);
