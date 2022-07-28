@@ -21,7 +21,7 @@ app.use('/models', express.static(path.join(path.join(__dirname, 'examples'), 'm
 app.use('/js', express.static(__dirname + '/js'));
 // app.use('/assets',express.static(__dirname + '/assets'));
 
-const app_version = process.env.HEROKU_RELEASE_CREATED_AT || 1;//HEROKU_RELEASE_VERSION
+const app_version = process.env.HEROKU_SLUG_COMMIT || 1;//HEROKU_RELEASE_VERSION
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
