@@ -101,7 +101,9 @@ io.on('connection', function (socket) {
 
 
             console.log("gama of " + gama);
-            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            // gama.experimentName = 'road_traffic';
+            gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
             gama.experimentName = 'road_traffic';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
             // gama.executor_speed=100;

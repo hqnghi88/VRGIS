@@ -23,6 +23,7 @@
     "webcola": "^3.4.0"
   },
   "devDependencies": {
+    "@types/socket.io": "^3.0.2",
     "got": "^11.3.0",
     "tape": "^4.7.0"
   },
