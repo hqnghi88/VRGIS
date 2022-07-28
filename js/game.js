@@ -102,6 +102,8 @@ Game.removePlayer = function (id) {
     tb.remove(pple.get(id));
     pple.delete(id);
     delete gamestate.players[id];
+    tb.update();
+    map.triggerRepaint();
 };
 
 Game.movePlayer = function (id, dest) {

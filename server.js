@@ -188,8 +188,8 @@ io.on('connection', function (socket) {
                 gama.wSocket.close();
             }
             gama = null;
-            players.delete(socket.player.id); 
             io.emit('remove', socket.player.id);
+            players.delete(socket.player.id); 
         });
     });
 
@@ -209,7 +209,7 @@ function getAllPlayers() {
     //         var player = s.player;
     //         if (player) players.push(player);
     //     }); 
-    return  Array.from(players.values()) ;
+    return  [...players.values()];// Array.from(players.values()) ;
 }
 
 function randomInt(low, high) {
