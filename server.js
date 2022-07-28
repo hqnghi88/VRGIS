@@ -21,15 +21,24 @@ app.use('/models', express.static(path.join(path.join(__dirname, 'examples'), 'm
 app.use('/js', express.static(__dirname + '/js'));
 // app.use('/assets',express.static(__dirname + '/assets'));
 
-app.use(function(req, res, next) {
+const app_version = process.env.HEROKU_RELEASE_VERSION || 1;
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     next();
-  });
-app.get('/', function (request, response) {
-    response.sendFile(path.join(__dirname + '/examples/20-game.html'));
 });
-
+app.get('/', function (request, response) {
+    const options = {
+        headers: {
+            'Access-Control-Expose-Headers': 'User',
+            'AppVersion': JSON.stringify(app_version),
+        }
+    };
+    response.sendFile(path.join(__dirname + '/examples/20-game.html'), options);
+});
+app.get("/app_info.js", function (req, res) {
+    res.send('window.app_info={"version":"' + app_version + '"}');
+});
 app.get('/home', function (request, response) {
     if (request.session.loggedin) {
         response.sendFile(__dirname + '/examples/20-game.html');
@@ -41,12 +50,9 @@ app.get('/home', function (request, response) {
 });
 
 server.lastPlayderID = 0;
-const app_version=process.env.HEROKU_RELEASE_VERSION;
-myObject = { app_version };
 
-this.injectString = JSON.stringify( myObject ).replace(/\\/g, '\\\\').replace(/"/g, '\\\"')
 server.listen(process.env.PORT || 80, function () {
-    console.log('Version '+app_version);
+    console.log('Version ' + app_version);
     console.log('Listening on ' + server.address().port);
 });
 
@@ -129,8 +135,8 @@ io.on('connection', function (socket) {
                         socket.player.x = eee[0];
                         socket.player.y = eee[1];
                         socket.player.dest = [eee[0], eee[1]];
-                        socket.join(socket.player.room[0]+""+socket.player.room[1]);
-                        io.sockets.in(socket.player.room[0]+""+socket.player.room[1]).emit('started', socket.player);
+                        socket.join(socket.player.room[0] + "" + socket.player.room[1]);
+                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('started', socket.player);
                     });
 
                 }, function () { });
@@ -145,7 +151,7 @@ io.on('connection', function (socket) {
 
                     } else {
                         socket.player.creep = JSON.parse(message);
-                        io.sockets.in(socket.player.room[0]+""+socket.player.room[1]).emit('allCreep', socket.player);
+                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
                     }
                 });
                 // );
@@ -155,11 +161,11 @@ io.on('connection', function (socket) {
 
         });
 
-        socket.on('joinGame', function (data) { 
-            socket.join(data[0]+""+data[1]);
+        socket.on('joinGame', function (data) {
+            socket.join(data[0] + "" + data[1]);
         });
-        socket.on('leaveGame', function (data) { 
-            socket.leave(data[0]+""+data[1]);
+        socket.on('leaveGame', function (data) {
+            socket.leave(data[0] + "" + data[1]);
         });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);

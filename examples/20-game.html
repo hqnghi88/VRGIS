@@ -13,14 +13,22 @@
 
 </head>
 
-<body><script>console.log(JSON.parse("<%- @injectString %>"));</script>
+<body> 
 	<div id='map' class='map'>
 		<div class="mapboxgl-ctrl helpDiv">
 			<div id="help" class="help">
 				Click on map to walk
 			</div>
 		</div>
+		<div id="attribution" class="mapboxgl-ctrl mapboxgl-ctrl-attrib mapboxgl-ctrl-bottom-right" style="position: fixed; bottom: 0; right: 0px;">
+			<div id="appversion"></div>
+		</div>
 	</div>
+	<script src="app_info.js"></script>
+	<script>
+	console.log(window.app_info.version);
+	document.getElementById('appversion').innerHTML="Ver "+window.app_info.version;
+	</script>
 	<div class="filter-ctrl">
 		<input id="room-input" type="button" value="Create Room" style="width: 100px;" onclick="createRoom()">
 		<input id="room-start" type="button" value="Start" style="width: 100px;"  onclick="startGame()"> 
