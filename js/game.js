@@ -47,10 +47,8 @@ socket.on('player-remove', (id) => {
 
 var Game = {};
 
-Game.addNewPlayer = function (id, x, y, o, d) {
+Game.addNewPlayer = function (id, o, d) {
     gamestate.players[id] = {
-        x: x,
-        y: y,
         ori: o,
         dest: d,
         moving: false,
@@ -77,7 +75,7 @@ Game.addNewPlayer = function (id, x, y, o, d) {
 
     tb.loadObj(options, function (model) {
         //     human = model.setCoords(mapConfig.human.origin); 
-        var _human1 = model.setCoords([gamestate.players[id].x, gamestate.players[id].y]);
+        var _human1 = model.setCoords(gamestate.players[id].ori);
 
         // var _human1 = model.setCoords(mapConfig.human.origin);
         // _human1.setRotation({ x: -90, y: 0, z: 0 }); //turn it to the initial street way
@@ -119,21 +117,35 @@ Game.movePlayer = function (id, dest) {
     // });
 };
 
-Game.showRoom = function (data) { 
-    document.getElementById('room_id').value=data.room[0];
+Game.intoRoom = function (data) {
+    var soldier = pple.get(main_id);
+    if (!soldier) return;
+    soldier.setCoords(data);
+    centerSoldier();
 }
-Game.allCreep = function (data) { 
+Game.outRoom = function (data) { 
+    var soldier = pple.get(main_id);
+    if (!soldier) return;
+    soldier.setCoords(data);
+    centerSoldier();
+}
+Game.showRoom = function (data) {
+    document.getElementById('room_id').value = data.room[0];
+    document.getElementById('exp_id').value = "";
+}
+Game.allCreep = function (data) {
     showCreep(data.creep);
 }
-Game.startGame = function (data) {  
-    document.getElementById('room_id').value=data.room[0];
-    document.getElementById('exp_id').value=data.room[1];
-    
-    pple.forEach((human) => { 
-        human.setCoords(data.roomloc);
-    });
+Game.startGame = function (data) {
+    document.getElementById('room_id').value = data.room[0];
+    document.getElementById('exp_id').value = data.room[1];
+
+    var soldier = pple.get(main_id);
+    if (!soldier) return;
+    soldier.setCoords(data.roomloc);
+
     centerSoldier();
-    start_sim(data.room[0],data.room[1]);
+    // start_sim(data.room[0], data.room[1]);
 }
 Game.showMessage = function (id, m) {
     clearTimeout(gamestate.players[id].msgtimeout);

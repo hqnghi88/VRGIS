@@ -57,26 +57,27 @@ server.listen(process.env.PORT || 80, function () {
 });
 
 
-var players =new Map();
+var players = new Map();
+var roomloc = new Map();
 io.on('connection', function (socket) {
-    socket.on('newplayer', function () { 
+    socket.on('newplayer', function () {
         console.log("newplayer " + server.lastPlayderID);//[105.771453381, 10.022111449]
         var xx = 105.771453381 + Math.random() / 10000;
         var yy = 10.022111449 + Math.random() / 10000;
         socket.player = {
             id: server.lastPlayderID++,
-            x: xx,
-            y: yy,
             ori: [xx, yy],
             dest: [xx, yy],
-            room: [],
+            outroom: [xx, yy],
+            inroom: [xx, yy],
+            room: [0, 0],
             roomloc: [],
             creep: '',
             msg: ''
             // x: randomInt(100,400),
             // y: randomInt(100,400)
         };
-        players.set(socket.player.id,socket.player);
+        players.set(socket.player.id, socket.player);
         socket.emit('allplayers', getAllPlayers());
         socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
@@ -98,6 +99,8 @@ io.on('connection', function (socket) {
             gama.connect(
                 function (e) {
                     gama.socket_id = e.data;
+                    var roomid = socket.player.room[0] + "" + socket.player.room[1];
+                    roomloc.delete(roomid);
                     socket.player.room = [gama.socket_id, gama.exp_id];
                     io.emit('room', socket.player);
                 }, function () { });
@@ -117,10 +120,10 @@ io.on('connection', function (socket) {
 
 
             console.log("gama of " + gama);
-            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
-            // gama.experimentName = 'road_traffic';
-            gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
             gama.experimentName = 'road_traffic';
+            // gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            // gama.experimentName = 'road_traffic';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
             // gama.executor_speed=100;
             gama.launch(
@@ -131,13 +134,13 @@ io.on('connection', function (socket) {
                         ee = JSON.parse(ee).result.replace(/[{}]/g, "");
                         var eee = ee.split(",");
                         socket.player.room = [gama.socket_id, gama.exp_id];
+                        var roomid = socket.player.room[0] + "" + socket.player.room[1];
                         socket.player.roomloc = [eee[0], eee[1]];
-
-                        socket.player.x = eee[0];
-                        socket.player.y = eee[1];
+                        roomloc.set(roomid, socket.player.roomloc);
+                        socket.player.ori = [eee[0], eee[1]];
                         socket.player.dest = [eee[0], eee[1]];
-                        socket.join(socket.player.room[0] + "" + socket.player.room[1]);
-                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('started', socket.player);
+                        socket.join(roomid);
+                        io.sockets.in(roomid).emit('started', socket.player);
                     });
 
                 }, function () { });
@@ -164,15 +167,20 @@ io.on('connection', function (socket) {
 
         socket.on('joinGame', function (data) {
             socket.join(data[0] + "" + data[1]);
+            socket.player.room = [data[0], data[1]];
+            socket.player.outroom = socket.player.ori;
+            socket.emit("intoRoom", roomloc.get(socket.player.room[0] + "" + socket.player.room[1]));
         });
         socket.on('leaveGame', function (data) {
             socket.leave(data[0] + "" + data[1]);
+            socket.player.ori = socket.player.outroom;
+            socket.emit("outRoom", socket.player.ori);
         });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);
-            socket.player.x = data.x;
-            socket.player.y = data.y;
+            
             socket.player.dest = [data.x, data.y];
+            socket.player.ori = socket.player.dest;
             io.emit('move', socket.player);
         });
 
@@ -189,7 +197,7 @@ io.on('connection', function (socket) {
             }
             gama = null;
             io.emit('remove', socket.player.id);
-            players.delete(socket.player.id); 
+            players.delete(socket.player.id);
         });
     });
 
@@ -209,7 +217,7 @@ function getAllPlayers() {
     //         var player = s.player;
     //         if (player) players.push(player);
     //     }); 
-    return  [...players.values()];// Array.from(players.values()) ;
+    return [...players.values()];// Array.from(players.values()) ;
 }
 
 function randomInt(low, high) {

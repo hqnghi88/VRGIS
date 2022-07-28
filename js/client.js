@@ -35,7 +35,7 @@ Client.sendMessage = function (m) {
 };
  
 Client.socket.on('newplayer', function (data) { 
-    Game.addNewPlayer(data.id, data.x, data.y, data.ori, data.dest);
+    Game.addNewPlayer(data.id, data.ori, data.dest);
 });
 Client.socket.on('mainplayer',function(data){
     main_id=data.id; 
@@ -45,12 +45,17 @@ Client.socket.on('mainplayer',function(data){
 
 Client.socket.on('allplayers', function (data) {
     for (var i = 0; i < data.length; i++) {
-
-        Game.addNewPlayer(data[i].id, data[i].x, data[i].y, data[i].ori, data[i].dest);
+        Game.addNewPlayer(data[i].id, data[i].ori, data[i].dest);
     }
 
     Client.socket.on('room', function (data) { 
         Game.showRoom(data);
+    });
+    Client.socket.on('intoRoom', function (data) { 
+        Game.intoRoom(data);
+    });
+    Client.socket.on('outRoom', function (data) { 
+        Game.outRoom(data);
     });
     Client.socket.on('exitRoom', function (data) { 
         Game.exitRoom(data);

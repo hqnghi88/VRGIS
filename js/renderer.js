@@ -53,7 +53,7 @@ window.tb = new Threebox(
     {
         defaultLights: true,
         // realSunlight: true,
-        enableSelectingObjects: true,
+        // enableSelectingObjects: true,
         // enableDraggingObjects: true,
         // enableRotatingObjects: true,
         // enableTooltips: true

@@ -30,6 +30,9 @@ class GAMA {
             clearInterval(this.executor);
             if (closed_callback) closed_callback();
         };
+        this.wSocket.onerror=function(event){
+            console.log("Error: "+event.message);
+        }
         this.wSocket.addEventListener('open', () => {
             this.wSocket.onmessage = (event)=>  {
                 this.executor = setInterval(() => {
