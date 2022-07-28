@@ -46,7 +46,7 @@ var map = new mapboxgl.Map({
     bearing: mapConfig.map.bearing,
     attributionControl: false,
     antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
-}); 
+});
 window.tb = new Threebox(
     map,
     map.getCanvas().getContext('webgl'),
@@ -98,21 +98,21 @@ function startGame() {
     if (s === "" || e === "") {
         Client.startGame();
     } else {
-        Client.joinGame([s,e]);
+        Client.joinGame([s, e]);
         start_sim(s, e);
     }
 }
 function exitGame() {
     let s = document.getElementById('room_id').value;
     let e = document.getElementById('exp_id').value;
-    if (s === "" || e === "") { 
+    if (s === "" || e === "") {
     } else {
-        Client.leaveGame([s,e]); 
-        
+        Client.leaveGame([s, e]);
+
         creep.forEach((value) => {
-            tb.remove(value); 
-        }) 
-        creep=new Map();
+            tb.remove(value);
+        })
+        creep = new Map();
     }
 }
 function easing(t) {
@@ -185,10 +185,13 @@ function travelPath(id, destination) {
             }
         ]
     };
+
+    const ddistance = turf.length(route);
+    // console.log(ddistance);
     let duration = 5000;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: 1,
+        animation: ddistance > 0.05 ? 1 : 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
@@ -475,17 +478,17 @@ function start_sim(s, e) {
 
     // gama.play();
 }
-    var creep_options = {
-        // type: mapConfig.human.type, //model type
-        // obj: mapConfig.human.model + "." + mapConfig.human.type,
-        type: 'glb',
-        obj: "models/untitled.glb",
-        scale: 2,
-        units: 'meters',
-        rotation: { x: 90, y: 0, z: 0 },
-        anchor: 'top',
-        clone: false //objects won't be cloned
-    }
+var creep_options = {
+    // type: mapConfig.human.type, //model type
+    // obj: mapConfig.human.model + "." + mapConfig.human.type,
+    type: 'glb',
+    obj: "models/untitled.glb",
+    scale: 2,
+    units: 'meters',
+    rotation: { x: 90, y: 0, z: 0 },
+    anchor: 'top',
+    clone: false //objects won't be cloned
+}
 function showCreep(geojson) {
     geojson.features.forEach((e) => {
         // console.log(pple.get(e.properties.name));
