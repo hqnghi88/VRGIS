@@ -36,11 +36,11 @@ $.ui.dialog.prototype._init = function () {
         dialog_element.open();
     });
 };
-function create1() {
+function create1(title,content) {
     var div_count = $('.dialog_window').length + 1;
     var div_id = 'dialog_window_' + div_count;
-    var div_title = $('#new_window_title').val();
-    var div_content = $('#new_window_content').val();
+    var div_title =title;// $('#new_window_title').val();
+    var div_content =content;// $('#new_window_content').val();
     var buttons = new Array();
     // if ($('#alertbutton').is(':checked')) {
     //     buttons.push({
@@ -70,12 +70,10 @@ function create1() {
         buttons: buttons
     });
 }
-
-$('#new_window_title').val("Controller");
-$('#new_window_content').val($('#controller_html').html());
-$('#controller_html').html('');
+ 
 //<input type="button" value="Load">  <input type="button" value="Compile" onclick="compile()">
-create1();
+create1("Controller",$('#controller_html').html());
+$('#controller_html').html('');
 
 $('#' + 'dialog_window_2').dialog("widget").find(".ui-dialog-titlebar-close").hide();
 $('#' + 'dialog_window_2').parent().css({ left: 0, top: 0 });
