@@ -65,6 +65,8 @@ Game.addNewPlayer = function (id, o, d) {
         obj: mapConfig.human.model + "." + mapConfig.human.type,
         // type:'glb',
         // obj:"models/untitled.glb",
+        // type:'gltf',
+        // obj:"models/Soldier.gltf",
         scale: 3,
         units: 'meters',
         rotation: { x: 90, y: 0, z: 0 },

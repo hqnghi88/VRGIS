@@ -34,14 +34,14 @@ app.get('/', function (request, response) {
             'AppVersion': JSON.stringify(app_version),
         }
     };
-    response.sendFile(path.join(__dirname + '/examples/20-game.html'), options);
+    response.sendFile(path.join(__dirname + 'index.html'), options);
 });
 app.get("/app_info.js", function (req, res) {
     res.send('window.app_info={"version":"' + app_version + '"}');
 });
 app.get('/home', function (request, response) {
     if (request.session.loggedin) {
-        response.sendFile(__dirname + '/examples/20-game.html');
+        response.sendFile(__dirname + 'index.html');
     } else {
         //response.send('Please login to view this page!');
         response.redirect('/');

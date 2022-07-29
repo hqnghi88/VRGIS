@@ -15,7 +15,7 @@ var pple = new Map();
 var creep = new Map();
 let minZoom = 12;
 var mapConfig = {
-    map: { center: [105.771453381, 10.022111449], zoom: 20, pitch: 45, bearing: 0 },//[105.771453381, 10.022111449]
+    map: { center: [105.771453381, 10.022111449], zoom: 21, pitch: 60, bearing: 0 },//[105.771453381, 10.022111449]
     human: {
         origin: [105.771453381, 10.022111449],
         type: 'glb',
@@ -40,6 +40,7 @@ var map = new mapboxgl.Map({
     // style: "mapbox://styles/mapbox/streets-v11?optimize=true",
     // style: "https://wasac.github.io/mapbox-stylefiles/unvt/style.json",
 
+    maxZoom: 25,
     zoom: mapConfig.map.zoom,
     center: mapConfig.map.center,
     pitch: mapConfig.map.pitch,
@@ -196,7 +197,7 @@ function travelPath(id, destination) {
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
-        duration: ddistance/duration*200000
+        duration: ddistance / duration * (ddistance > 0.05 ? 100000 : 200000)
     }
 
     // // set up geometry for a line to be added to map, lofting it up a bit for *style*
@@ -211,7 +212,6 @@ function travelPath(id, destination) {
     // 	width: 5,
     // 	color: 'steelblue'
     // })
-
     soldier.playAnimation(options);
 
     soldier.followPath(
@@ -219,8 +219,11 @@ function travelPath(id, destination) {
         function () {
             // console.log(id);
             gamestate.players[id].ori = destination;
+
             soldier.setCoords(destination);
-            // soldier.playAnimation({ animation:-12, duration: 1 });
+            soldier.playAnimation({ animation: 0, duration: 100000000000 });
+            // console.log(soldier.animations);   
+
 
             // for (iii in gamestate.players) {
             //     pple.get(parseInt(iii)).setCoords(gamestate.players[iii].dest);
@@ -231,6 +234,38 @@ function travelPath(id, destination) {
 
 
     // })
+}
+
+function init() {
+    animate();
+
+}
+
+function animate() {
+    // human.playAnimation(opt);
+    // pple.forEach((value) => {
+    //     value.playAnimation({ animation: 3, duration: 100000000 });
+    // }) 
+    // console.log(gamestate.players[main_id].moving);
+    // var options = {
+    //     animation:  0,
+    //     duration: 500000000//ddistance/duration*200000
+    // }
+
+    // pple.get(main_id).playAnimation({ animation: 0, duration: 100000000 });
+    // requestAnimationFrame(animate);
+    // // pple.get(main_id).playAnimation({ animation:0, duration: 100    });
+    // // stats.update(); 
+    // let options = {
+    //     center: pple.get(main_id).coordinates,
+    //     bearing: map.getBearing(),
+    //     easing: easing
+    // };
+
+
+    // map.jumpTo(options);
+    tb.map.update = true;
+
 }
 
 
@@ -299,7 +334,7 @@ function centerSoldier() {
     let opt = {
         // center: [gamestate.players[main_id].x,gamestate.players[main_id].y],
         center: soldier.coordinates,
-        bearing: map.getBearing(), zoom: 20,
+        bearing: map.getBearing(), zoom: 21,
         easing: easing
     };
     map.jumpTo(opt);
@@ -350,64 +385,11 @@ function createCompositeLayer(layerId) {
     return layer;
 }
 
-// import { GUI } from 'https://threejs.org/examples/jsm/libs/lil-gui.module.min.js';
-// import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
-// let stats, gui;
-let fHover;
-
 let api = {
     buildings: true,
     acceleration: 2,
     inertia: 3
 };
-
-function init() {
-    // stats
-    // stats = new Stats();
-    // map.getContainer().appendChild(stats.dom);
-
-    animate();
-
-    // gui
-    // gui = new GUI();
-    // // this will define if there's a fixed zoom level for the model
-    // gui.add(api, 'buildings').name('buildings').onChange(changeGui);
-    // gui.add(api, 'acceleration', 1, 10).step(0.5);
-    // gui.add(api, 'inertia', 1, 5).step(0.5);
-}
-
-function changeGui() {
-    let l = mapConfig.names.compositeLayer;
-    if (api.buildings) {
-        if (!map.getLayer(l)) { map.addLayer(createCompositeLayer(l)); }
-    }
-    else {
-        if (map.getLayer(l)) { map.removeLayer(l) }
-
-    }
-
-    tb.map.repaint = true;
-}
-
-let duration = 50;
-var opt = {
-    animation: 3,
-    duration: duration
-}
-// mainLoop();
-function animate() {
-    // human.playAnimation(opt);
-    // pple.forEach((value) => {
-    //     value.playAnimation({ animation: 3, duration: 100000000 });
-    // }) 
-    requestAnimationFrame(animate);
-    // stats.update(); 
-
-    // map.jumpTo(options); 
-    tb.map.update = true;
-
-}
-
 
 
 // var updateSource;
