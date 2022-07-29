@@ -188,14 +188,14 @@ function travelPath(id, destination) {
 
     const ddistance = turf.length(route);
     // console.log(ddistance);
-    let duration = 5000;
+    let duration = 50;
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
         animation: ddistance > 0.05 ? 1 : 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
-        duration: duration
+        duration: ddistance/duration*5000000
     }
 
     // // set up geometry for a line to be added to map, lofting it up a bit for *style*
