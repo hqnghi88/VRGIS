@@ -141,8 +141,12 @@ map.on('style.load', function () {
         Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
         // }
     })
+    // .on('dblclick', e => {
+    //     // console.log(e);
+    //     Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
+    //   })
     ;
-
+    map.doubleClickZoom.disable();
 const filterInput = document.getElementById('filter-input');
 filterInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -162,7 +166,7 @@ function createLabelIcon(text) {
     popup.innerHTML = '<div title="' + text + '" style="font-size: 12;color: yellow;background-color:gray">' + text + '</div>';
     return popup;
 }
-function travelPath(id, destination) {
+function travelPath(id, destination, run) {
     var soldier = pple.get(id);
     if (!soldier) return;
     soldier.setCoords(soldier.coordinates);
@@ -193,11 +197,11 @@ function travelPath(id, destination) {
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: ddistance > 0.05 ? 1 : 3,
+        animation: (ddistance > 0.05 || run)  ? 1 : 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
-        duration: ddistance / duration * (ddistance > 0.05 ? 100000 : 200000)
+        duration: ddistance / duration * ((ddistance > 0.05 || run) ? 100000 : 200000)
     }
 
     // // set up geometry for a line to be added to map, lofting it up a bit for *style*
@@ -310,14 +314,26 @@ function creepPath(id, destination) {
             }
         ]
     };
-    let duration = 5000;
+    // let duration = 5000;
+    // var options = {
+    //     animation: 0,
+    //     // path: data.routes[0].geometry.coordinates,
+    //     path: route.features[0].geometry.coordinates,
+    //     trackHeading: true,
+    //     duration: duration
+    // }
+    const ddistance = turf.length(route);
+    let duration = 1;
+    // console.log( ddistance );
+    // console.log( ddistance/duration*200000);
+    // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: 0,
-        // path: data.routes[0].geometry.coordinates,
+        animation: 0, 
         path: route.features[0].geometry.coordinates,
-        trackHeading: true,
-        duration: duration
+        trackHeading:true,
+        duration: ddistance / duration * (ddistance > 0.05 ? 100000 : 200000)
     }
+
     soldier.playAnimation(options);
 
     soldier.followPath(
@@ -474,7 +490,7 @@ var creep_options = {
 }
 function showCreep(geojson) {
     geojson.features.forEach((e) => {
-        // console.log(pple.get(e.properties.name));
+        // console.log(e.properties.name);
         if (creep.get(e.properties.name)) {
             var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
             // var pt = [destxx,destyy];
@@ -504,70 +520,70 @@ function showCreep(geojson) {
     });
 }
 
-function initpeople() {
+// function initpeople() {
 
-    gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
-        if (typeof message == "object") {
+//     gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+//         if (typeof message == "object") {
 
-        } else {
-            geojson = null;
-            geojson = JSON.parse(message);
-            // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
-
-
-            geojson.features.forEach((e) => {
-                tb.loadObj(creep_options, function (model) {
-                    var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-
-                    _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
-                    // console.log(mapConfig.human);
-                    // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
-                    // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
-                    _human1.castShadow = true;
-                    _human1.selected = false;
-                    // human1.addEventListener('ObjectChanged', onObjectChanged, false);
-
-                    tb.add(_human1);
-                    creep.set(e.properties.name, _human1);
-                    // console.log(pple);
-                    // init();
-                    if (creep.size === 10) {
-                        start_renderer();
-                    }
-                });
-            });
-        }
-    });
-}
-function start_renderer() {
-    updateSource = setInterval(() => {
-        // if (gama.state === "play") {
-        // gama.step(
-
-        gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
-            if (typeof message == "object") {
-
-            } else {
-                geojson = null;
-                geojson = JSON.parse(message);
-                // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
+//         } else {
+//             geojson = null;
+//             geojson = JSON.parse(message);
+//             // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
 
 
+//             geojson.features.forEach((e) => {
+//                 tb.loadObj(creep_options, function (model) {
+//                     var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
 
-                geojson.features.forEach((e) => {
-                    // console.log(pple.get(e.properties.name));
-                    if (creep.get(e.properties.name)) {
-                        var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
-                        // var pt = [destxx,destyy];
-                        creepPath(e.properties.name, dest);
-                        // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-                    }
-                });
-                // console.log(pple);
-            }
-        });
-        // );
+//                     _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
+//                     // console.log(mapConfig.human);
+//                     // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+//                     // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
+//                     _human1.castShadow = true;
+//                     _human1.selected = false;
+//                     // human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
-        // }
-    }, 5000);
-}
+//                     tb.add(_human1);
+//                     creep.set(e.properties.name, _human1);
+//                     // console.log(pple);
+//                     // init();
+//                     if (creep.size === 10) {
+//                         start_renderer();
+//                     }
+//                 });
+//             });
+//         }
+//     });
+// }
+// function start_renderer() {
+//     updateSource = setInterval(() => {
+//         // if (gama.state === "play") {
+//         // gama.step(
+
+//         gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+//             if (typeof message == "object") {
+
+//             } else {
+//                 geojson = null;
+//                 geojson = JSON.parse(message);
+//                 // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
+
+
+
+//                 geojson.features.forEach((e) => {
+//                     // console.log(e.properties.name);
+//                     if (creep.get(e.properties.name)) {
+//                         var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
+//                         // var pt = [destxx,destyy];
+//                         creepPath(e.properties.name, dest);
+//                         // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+//                     }
+//                 });
+//                 // console.log(pple);
+//             }
+//         });
+//         // );
+
+//         // }
+//     }, 5000);
+// }

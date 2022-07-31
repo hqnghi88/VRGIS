@@ -107,16 +107,23 @@ Game.removePlayer = function (id) {
 };
 
 Game.movePlayer = function (id, dest) {
-    // console.log(xx);
     // gamestate.players[id].x = gamestate.players[id].x + xx / 1000000;
     // gamestate.players[id].y = gamestate.players[id].y + yy / 1000000;
     // pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
-    gamestate.players[id].dest = dest;
-    // var pt = [destxx,destyy];
-    travelPath(id, dest);
-    // pple.forEach((human) => { 
-    //     travelPath(human.dest);
-    // });
+    // console.log("id "+gamestate.players[id].dest);
+    // console.log("d "+dest);
+    if (gamestate.players[id].dest[0] === dest[0] && gamestate.players[id].dest[1] === dest[1]) {
+
+        gamestate.players[id].dest = dest;
+        travelPath(id, dest, true);
+    } else {
+        gamestate.players[id].dest = dest;
+        // var pt = [destxx,destyy];
+        travelPath(id, dest);
+        // pple.forEach((human) => { 
+        //     travelPath(human.dest);
+        // });
+    }
 };
 
 Game.intoRoom = function (data) {
@@ -125,7 +132,7 @@ Game.intoRoom = function (data) {
     soldier.setCoords(data);
     centerSoldier();
 }
-Game.outRoom = function (data) { 
+Game.outRoom = function (data) {
     var soldier = pple.get(main_id);
     if (!soldier) return;
     soldier.setCoords(data);

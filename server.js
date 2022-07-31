@@ -120,8 +120,10 @@ io.on('connection', function (socket) {
 
 
             console.log("gama of " + gama);
-            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
-            gama.experimentName = 'road_traffic';
+            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
+            // gama.experimentName = 'road_traffic';
+            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Toy Models/Circle/Circle.gaml';
+            gama.experimentName = 'main';
             // gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
             // gama.experimentName = 'road_traffic';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
@@ -150,7 +152,7 @@ io.on('connection', function (socket) {
                 // if (gama.state === "play") {
                 // gama.step(
 
-                gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+                gama.getPopulation("cell", ["name"], "EPSG:4326", function (message) {
                     if (typeof message == "object") {
 
                     } else {
