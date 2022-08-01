@@ -91,7 +91,8 @@ Game.addNewPlayer = function (id, o, d) {
         tb.add(_human1);
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
         pple.set(id, _human1);
-        init();
+        _human1.playAnimation({ animation: 0, duration: 100000000000 });
+        // init();
         // if (pple.size === 10) {
         //     start_renderer();
         // }
@@ -119,11 +120,23 @@ Game.movePlayer = function (id, dest) {
     } else {
         gamestate.players[id].dest = dest;
         // var pt = [destxx,destyy];
-        travelPath(id, dest);
+        travelPath(id, dest,false);
         // pple.forEach((human) => { 
         //     travelPath(human.dest);
         // });
     }
+};
+Game.updatePosition = function (id, dest) { 
+    var soldier = pple.get(id);
+    if (!soldier) return;
+    // console.log(id);
+    gamestate.players[id].ori = dest;
+    gamestate.players[id].dest = dest;
+    soldier.setCoords(dest); 
+    soldier.playAnimation({ animation: 0, duration: 100000000000 });
+    // tb.update();
+    // map.triggerRepaint();
+    // travelPath(id, [dest[0]+0.001,dest[1]+0.001],false); 
 };
 
 Game.intoRoom = function (data) {
@@ -131,12 +144,14 @@ Game.intoRoom = function (data) {
     if (!soldier) return;
     soldier.setCoords(data);
     centerSoldier();
+    soldier.playAnimation({ animation: 0, duration: 100000000000 });
 }
 Game.outRoom = function (data) {
     var soldier = pple.get(main_id);
     if (!soldier) return;
     soldier.setCoords(data);
     centerSoldier();
+    soldier.playAnimation({ animation: 0, duration: 100000000000 });
 }
 Game.showRoom = function (data) {
     document.getElementById('room_id').value = data.room[0];
@@ -154,6 +169,7 @@ Game.startGame = function (data) {
     soldier.setCoords(data.roomloc);
 
     centerSoldier();
+    soldier.playAnimation({ animation: 0, duration: 100000000000 });
     // start_sim(data.room[0], data.room[1]);
 }
 Game.showMessage = function (id, m) {

@@ -141,29 +141,30 @@ io.on('connection', function (socket) {
                         roomloc.set(roomid, socket.player.roomloc);
                         socket.player.ori = [eee[0], eee[1]];
                         socket.player.dest = [eee[0], eee[1]];
+                        io.emit('updatePosition', socket.player);
                         socket.join(roomid);
                         io.sockets.in(roomid).emit('started', socket.player);
                     });
 
+                    console.log("updateSource of " + socket.player.id);
+                    updateSource = setInterval(() => {
+                        // if (gama.state === "play") {
+                        // gama.step(
+
+                        gama.getPopulation("cell", ["name"], "EPSG:4326", function (message) {
+                            if (typeof message == "object") {
+
+                            } else {
+                                socket.player.creep = JSON.parse(message);
+                                io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
+                            }
+                        });
+                        // );
+
+                        // }
+                    }, 10000);
                 }, function () { });
 
-            console.log("updateSource of " + socket.player.id);
-            updateSource = setInterval(() => {
-                // if (gama.state === "play") {
-                // gama.step(
-
-                gama.getPopulation("cell", ["name"], "EPSG:4326", function (message) {
-                    if (typeof message == "object") {
-
-                    } else {
-                        socket.player.creep = JSON.parse(message);
-                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
-                    }
-                });
-                // );
-
-                // }
-            }, 10000);
 
         });
 
@@ -171,16 +172,21 @@ io.on('connection', function (socket) {
             socket.join(data[0] + "" + data[1]);
             socket.player.room = [data[0], data[1]];
             socket.player.outroom = socket.player.ori;
-            socket.emit("intoRoom", roomloc.get(socket.player.room[0] + "" + socket.player.room[1]));
+            socket.player.ori = roomloc.get(socket.player.room[0] + "" + socket.player.room[1]);
+            socket.player.dest = socket.player.ori;
+            io.emit('updatePosition', socket.player);
+            socket.emit("intoRoom", socket.player.ori);
         });
         socket.on('leaveGame', function (data) {
             socket.leave(data[0] + "" + data[1]);
             socket.player.ori = socket.player.outroom;
+            socket.player.dest = socket.player.outroom;
+            io.emit('updatePosition', socket.player);
             socket.emit("outRoom", socket.player.ori);
         });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);
-            
+
             socket.player.dest = [data.x, data.y];
             socket.player.ori = socket.player.dest;
             io.emit('move', socket.player);

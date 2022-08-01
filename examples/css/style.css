@@ -4,7 +4,48 @@ html {
 	height: 100%;
 	margin: 0;
 }
-
+.loading {
+	content :"Loading";
+	background-color: black;
+	color: white;
+	opacity: 0.5;
+	font-family: PT Sans Narrow;
+  
+	font-size: 30px;
+	 
+	z-index: 99999999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+  }
+  
+  .loading:after {
+	
+	overflow: hidden;
+	display: inline-block;
+	vertical-align: bottom;
+	-webkit-animation: ellipsis steps(5,end) 1000ms infinite;      
+	animation: ellipsis steps(5,end) 1000ms infinite;
+	content: "\2026\2026"; /* ascii code for the ellipsis character */
+	width: 0px;
+  }
+  
+  @keyframes ellipsis {
+	to {
+	  width: 1.15em;    
+	}
+  }
+  
+  @-webkit-keyframes ellipsis {
+	to {
+	  width: 1.5em;    
+	}
+  }
 .dialog_form th {
 	text-align: left;
 }

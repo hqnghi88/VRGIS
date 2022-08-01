@@ -94,6 +94,7 @@ function createRoom() {
     Client.createRoom();
 }
 function startGame() {
+    loading_indi();
     let s = document.getElementById('room_id').value;
     let e = document.getElementById('exp_id').value;
     if (s === "" || e === "") {
@@ -131,7 +132,7 @@ map.on('style.load', function () {
         if (!map.getLayer(l)) { map.addLayer(createCompositeLayer(l)); }
     }
     map.getCanvas().focus();
-
+    loaded_indi();
 })
     .on('click', function (e) {
         // console.log(gamestate.players[main_id].moving);
@@ -146,7 +147,7 @@ map.on('style.load', function () {
     //     Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
     //   })
     ;
-    map.doubleClickZoom.disable();
+map.doubleClickZoom.disable();
 const filterInput = document.getElementById('filter-input');
 filterInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -197,7 +198,7 @@ function travelPath(id, destination, run) {
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: (ddistance > 0.2 || run)  ? 1 : 3,
+        animation: (ddistance > 0.2 || run) ? 1 : 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
@@ -240,37 +241,37 @@ function travelPath(id, destination, run) {
     // })
 }
 
-function init() {
-    animate();
+// function init() {
+//     animate();
 
-}
+// }
 
-function animate() {
-    // human.playAnimation(opt);
-    // pple.forEach((value) => {
-    //     value.playAnimation({ animation: 3, duration: 100000000 });
-    // }) 
-    // console.log(gamestate.players[main_id].moving);
-    // var options = {
-    //     animation:  0,
-    //     duration: 500000000//ddistance/duration*200000
-    // }
+// function animate() {
+//     // human.playAnimation(opt);
+//     // pple.forEach((value) => {
+//     //     value.playAnimation({ animation: 3, duration: 100000000 });
+//     // }) 
+//     // console.log(gamestate.players[main_id].moving);
+//     // var options = {
+//     //     animation:  0,
+//     //     duration: 500000000//ddistance/duration*200000
+//     // }
 
-    // pple.get(main_id).playAnimation({ animation: 0, duration: 100000000 });
-    // requestAnimationFrame(animate);
-    // // pple.get(main_id).playAnimation({ animation:0, duration: 100    });
-    // // stats.update(); 
-    // let options = {
-    //     center: pple.get(main_id).coordinates,
-    //     bearing: map.getBearing(),
-    //     easing: easing
-    // };
+//     pple.get(main_id).playAnimation({ animation: 0, duration: 100000000 });
+//     requestAnimationFrame(animate);
+//     // // pple.get(main_id).playAnimation({ animation:0, duration: 100    });
+//     // // stats.update(); 
+//     // let options = {
+//     //     center: pple.get(main_id).coordinates,
+//     //     bearing: map.getBearing(),
+//     //     easing: easing
+//     // };
 
 
-    // map.jumpTo(options);
-    tb.map.update = true;
+//     // map.jumpTo(options);
+//     tb.map.update = true;
 
-}
+// }
 
 
 function onObjectChanged(e) {
@@ -328,9 +329,9 @@ function creepPath(id, destination) {
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: 0, 
+        animation: 0,
         path: route.features[0].geometry.coordinates,
-        trackHeading:true,
+        trackHeading: true,
         duration: ddistance / duration * (ddistance > 0.05 ? 100000 : 200000)
     }
 
@@ -512,9 +513,10 @@ function showCreep(geojson) {
                 creep.set(e.properties.name, _human1);
                 // console.log(pple);
                 // init();
-                // if (creep.size === 10) {
-                //     start_renderer();
-                // }
+                if (creep.size == geojson.features.length) {
+                    loaded_indi();
+                    //     start_renderer();
+                }
             });
         }
     });
@@ -587,3 +589,12 @@ function showCreep(geojson) {
 //         // }
 //     }, 5000);
 // }
+
+function loading_indi() {
+    document.getElementById('loadani').innerHTML = '<div class="loading">Loading</div>';
+}
+function loaded_indi() {
+
+    document.getElementById('loadani').innerHTML = '';
+}
+loading_indi();

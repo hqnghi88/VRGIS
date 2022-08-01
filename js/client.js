@@ -69,6 +69,9 @@ Client.socket.on('allplayers', function (data) {
     Client.socket.on('move', function (data) {
         Game.movePlayer(data.id, data.dest);
     });
+    Client.socket.on('updatePosition', function (data) {
+        Game.updatePosition(data.id, data.dest);
+    });
     Client.socket.on('chat', function (data) {
         Game.showMessage(data.id, data.msg);
     });
