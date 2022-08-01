@@ -197,11 +197,11 @@ function travelPath(id, destination, run) {
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
     var options = {
-        animation: (ddistance > 0.05 || run)  ? 1 : 3,
+        animation: (ddistance > 0.2 || run)  ? 1 : 3,
         // path: data.routes[0].geometry.coordinates,
         path: route.features[0].geometry.coordinates,
         // trackHeading:false,
-        duration: ddistance / duration * ((ddistance > 0.05 || run) ? 100000 : 200000)
+        duration: ddistance / duration * ((ddistance > 0.2 || run) ? 100000 : 200000)
     }
 
     // // set up geometry for a line to be added to map, lofting it up a bit for *style*
