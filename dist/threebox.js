@@ -1920,35 +1920,35 @@ AnimationManager.prototype = {
 
 						object._setObject(objectState);
 						// console.log(geojson.features[0].geometry.coordinates);
-						if(object.label.element.innerText.startsWith("Gama")){
-							let url = $.grep(geojson.features, function(item) { return item.id === object.id })[0];
-							// console.log(url);
-							if(!url){
-								feature = {};
-								feature['type'] = 'Feature';
-								feature['id'] =object.id;
-								feature['geometry'] = {'type': 'Polygon',
-													'coordinates': [[[10, 10]]],
-													};
-								geojson.features.push(feature);
-								url = $.grep(geojson.features, function(item) { return item.id === object.id })[0];
-							}
-							let xx=object.coordinates[0];
-							let yy=object.coordinates[1];
-							let aa=[];
-							let dd=0.00002;
-							aa.push([xx-dd,yy-dd]);
-							aa.push([xx+dd,yy-dd]);
-							aa.push([xx+dd,yy+dd]);
-							aa.push([xx-dd,yy+dd]);
-							aa.push([xx-dd,yy-dd]);
+						// if(object.label.element.innerText.startsWith("Gama")){
+						// 	let url = $.grep(geojson.features, function(item) { return item.id === object.id })[0];
+						// 	// console.log(url);
+						// 	if(!url){
+						// 		feature = {};
+						// 		feature['type'] = 'Feature';
+						// 		feature['id'] =object.id;
+						// 		feature['geometry'] = {'type': 'Polygon',
+						// 							'coordinates': [[[10, 10]]],
+						// 							};
+						// 		geojson.features.push(feature);
+						// 		url = $.grep(geojson.features, function(item) { return item.id === object.id })[0];
+						// 	}
+						// 	let xx=object.coordinates[0];
+						// 	let yy=object.coordinates[1];
+						// 	let aa=[];
+						// 	let dd=0.00002;
+						// 	aa.push([xx-dd,yy-dd]);
+						// 	aa.push([xx+dd,yy-dd]);
+						// 	aa.push([xx+dd,yy+dd]);
+						// 	aa.push([xx-dd,yy+dd]);
+						// 	aa.push([xx-dd,yy-dd]);
 
-							url.geometry.coordinates=[aa];
-							// console.log(geojson.features[0].geometry.coordinates);
-							map.getSource("floorplan").setData(geojson);
+						// 	url.geometry.coordinates=[aa];
+						// 	// console.log(geojson.features[0].geometry.coordinates);
+						// 	map.getSource("floorplan").setData(geojson);
 							
 							
-						}
+						// }
 					}
 
 					//[jscastro] play default animation

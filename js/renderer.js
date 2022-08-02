@@ -126,21 +126,31 @@ map.on('style.load', function () {
         'data': geojson
     });
     map.addLayer({
+
+        // 'id': 'room-extrusion',
+        // 'type': 'circle',
+        // 'source': 'floorplan',
+        // 'layout': {},
+        // 'paint': {
+        //     'circle-color':['get', 'color'],
+        // }
+
+
         'id': 'room-extrusion',
         'type': 'fill-extrusion',
         'source': 'floorplan',
         'paint': {
             // Get the `fill-extrusion-color` from the source `color` property.
-            'fill-extrusion-color': 'gray',//['get', 'color'],
+            'fill-extrusion-color': ['get', 'color'],
 
             // Get `fill-extrusion-height` from the source `height` property.
-            'fill-extrusion-height':1,// ['get', 'height'],
+            'fill-extrusion-height': 1,// ['get', 'height'],
 
             // Get `fill-extrusion-base` from the source `base_height` property.
             'fill-extrusion-base': 0,//['get', 'base_height'],
 
             // Make extrusions slightly opaque to see through indoor walls.
-            'fill-extrusion-opacity': 0.5
+            // 'fill-extrusion-opacity': 0.5
         }
     });
     let l = mapConfig.names.compositeLayer;
@@ -202,22 +212,31 @@ function onObjectChanged(e) {
         let point = map.project(c);
         let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
 
-        // var bbox = [[point.x - 5, point.y - 5], [point.x + 5, point.y + 5]];
-        // var features = map.queryRenderedFeatures(bbox, { layers: ['3d-model'] });
+        // let dd = 0.0005;
+        // var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
+        // var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
         if (features.length > 0) {
-            light(features[0]); // crash!
+            light(features[0]); // crash! 
         }
     }
 }
 
 function light(feature) {
+    if (!feature.state.select) {
+        Client.killAgent(feature.properties.name);
+        fHover = feature;
+        map.setFeatureState({
+            source: fHover.source,
+            sourceLayer: fHover.sourceLayer,
+            id: fHover.id
+        }, { select: true });
+    }
     // console.log(feature);
-    fHover = feature;
-    map.setFeatureState({
-        source: fHover.source,
-        sourceLayer: fHover.sourceLayer,
-        id: fHover.id
-    }, { select: true });
+
+    // new mapboxgl.Popup()
+    // .setLngLat(e.lngLat)
+    // .setHTML(e.features[0].properties.name)
+    // .addTo(map);
 }
 function createRoom() {
     Client.createRoom();
@@ -540,36 +559,40 @@ var creep_options = {
     clone: false //objects won't be cloned
 }
 function showCreep(geojson) {
-    geojson.features.forEach((e) => {
-        // console.log(e.properties.name);
-        if (creepM.get(e.properties.name)) {
-            var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
-            // var pt = [destxx,destyy];
-            creepPath(e.properties.name, dest);
-            // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-        } else {
-            tb.loadObj(creep_options, function (model) {
-                var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
 
-                _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
-                // console.log(mapConfig.human);
-                // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
-                // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
-                _human1.castShadow = true;
-                _human1.selected = false;
-                // human1.addEventListener('ObjectChanged', onObjectChanged, false);
+    loaded_indi();
+    // console.log(geojson);
+    map.getSource("floorplan").setData(geojson);
+    // geojson.features.forEach((e) => {
+    // console.log(e.properties.name);
+    // if (creepM.get(e.properties.name)) {
+    //     var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
+    //     // var pt = [destxx,destyy];
+    //     creepPath(e.properties.name, dest);
+    //     // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+    // } else {
+    //     tb.loadObj(creep_options, function (model) {
+    //         var _human1 = model.setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
 
-                tb.add(_human1, "3d-game");
-                creepM.set(e.properties.name, _human1);
-                // console.log(pple);
-                // init();
-                if (creepM.size == geojson.features.length) {
-                    loaded_indi();
-                    //     start_renderer();
-                }
-            });
-        }
-    });
+    //         _human1.addLabel(createLabelIcon("Gama_" + e.properties.name), true);//, soldier.anchor, 1.5);
+    //         // console.log(mapConfig.human);
+    //         // _human1.setRotation(mapConfig.human.startRotation); //turn it to the initial street way
+    //         // human1.addTooltip("Walk with WASD keys", true, human1.anchor, true, 2);
+    //         _human1.castShadow = true;
+    //         _human1.selected = false;
+    //         // human1.addEventListener('ObjectChanged', onObjectChanged, false);
+
+    //         tb.add(_human1, "3d-game");
+    //         creepM.set(e.properties.name, _human1);
+    //         // console.log(pple);
+    //         // init();
+    //         if (creepM.size == geojson.features.length) {
+    //             loaded_indi();
+    //             //     start_renderer();
+    //         }
+    //     });
+    // }
+    // });
 }
 
 // function initpeople() {

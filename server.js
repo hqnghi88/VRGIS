@@ -122,8 +122,12 @@ io.on('connection', function (socket) {
             console.log("gama of " + gama);
             // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
             // gama.experimentName = 'road_traffic';
-            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Toy Models/Circle/Circle.gaml';
-            gama.experimentName = 'main';
+            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Toy Models/Circle/Circle.gaml';
+            // gama.experimentName = 'main';
+            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Modeling/Model Coupling/Co-PreyPredator/Prey Predator.gaml';
+            // gama.experimentName = 'Prey Predator Exp';
+            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Predator Prey/models/Model 06.gaml';
+            gama.experimentName = 'prey_predator';
             // gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
             // gama.experimentName = 'road_traffic';
             // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
@@ -150,24 +154,38 @@ io.on('connection', function (socket) {
                     updateSource = setInterval(() => {
                         // if (gama.state === "play") {
                         // gama.step(
-
-                        gama.getPopulation("cell", ["name"], "EPSG:4326", function (message) {
-                            if (typeof message == "object") {
-
-                            } else {
-                                socket.player.creep = JSON.parse(message);
-                                io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
-                            }
-                        });
+                        gama.step(
+                            gama.getPopulation("prey", ["name","color"], "EPSG:4326", function (message) {
+                                if (typeof message == "object") {
+    
+                                } else {
+                                    socket.player.creep = JSON.parse(message);
+                                    io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
+                                }
+                            })
+                        );
                         // );
 
                         // }
-                    }, 1000);
+                    }, 10000);
                 }, function () { });
 
 
         });
 
+        socket.on('killAgent', function (data) { 
+            gama.evalExpr('ask prey where(each.name="'+data+'"){do die;}', function (ee) {
+                // console.log(ee); 
+                gama.getPopulation("prey", ["name","color"], "EPSG:4326", function (message) {
+                    if (typeof message == "object") {
+
+                    } else {
+                        socket.player.creep = JSON.parse(message);
+                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
+                    }
+                })
+            });
+        });
         socket.on('joinGame', function (data) {
             socket.join(data[0] + "" + data[1]);
             socket.player.room = [data[0], data[1]];

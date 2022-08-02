@@ -19,6 +19,9 @@ Client.joinGame= function(data){
 Client.leaveGame= function(data){
     Client.socket.emit('leaveGame',data);
 };
+Client.killAgent= function(data){
+    Client.socket.emit('killAgent',data);
+};
 Client.createRoom= function(){
     Client.socket.emit('createRoom');
 };
