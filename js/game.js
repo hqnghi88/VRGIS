@@ -88,7 +88,7 @@ Game.addNewPlayer = function (id, o, d) {
 
         _human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
-        tb.add(_human1);
+        tb.add(_human1,"3d-model");
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
         pple.set(id, _human1);
         _human1.playAnimation({ animation: 0, duration: 100000000000 });

@@ -162,7 +162,7 @@ io.on('connection', function (socket) {
                         // );
 
                         // }
-                    }, 10000);
+                    }, 1000);
                 }, function () { });
 
 

@@ -12,7 +12,7 @@ mapboxgl.accessToken = config.accessToken;
 
 
 var pple = new Map();
-var creep = new Map();
+var creepM = new Map();
 let minZoom = 12;
 var mapConfig = {
     map: { center: [105.771453381, 10.022111449], zoom: 21, pitch: 60, bearing: 0 },//[105.771453381, 10.022111449]
@@ -65,7 +65,7 @@ window.tb = new Threebox(
 // parameters to ensure the model is georeferenced correctly on the map
 // let human;  
 function createCustomLayer(layerName) {
-    let model;
+    // let model;
     //create the layer
     let customLayer3D = {
         id: layerName,
@@ -90,55 +90,82 @@ function createCustomLayer(layerName) {
 
 };
 
-function createRoom() {
-    Client.createRoom();
-}
-function startGame() {
-    loading_indi();
-    let s = document.getElementById('room_id').value;
-    let e = document.getElementById('exp_id').value;
-    if (s === "" || e === "") {
-        Client.startGame();
-    } else {
-        Client.joinGame([s, e]);
-        start_sim(s, e);
-    }
-}
-function exitGame() {
-    let s = document.getElementById('room_id').value;
-    let e = document.getElementById('exp_id').value;
-    if (s === "" || e === "") {
-    } else {
-        Client.leaveGame([s, e]);
 
-        creep.forEach((value) => {
-            tb.remove(value);
-        })
-        creep = new Map();
-    }
-}
-function easing(t) {
-    return t * (2 - t);
-}
-
-let velocity = 0.0, speed = 0.0, ds = 0.01;
+// let velocity = 0.0, speed = 0.0, ds = 0.01;
 
 map.on('style.load', function () {
 
     map.addLayer(createCustomLayer('3d-model'));
+    let customgameLayer3D = {
+        id: '3d-game',
+        type: 'custom',
+        renderingMode: '3d',
+        onAdd: function (map, gl) {
+        },
+        render: function (gl, matrix) {
+            tb.update();
+        }
+    };
+    map.addLayer(customgameLayer3D);
+    map.on('click', '3d-buildings', (e) => {
+        new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(e.features[0].properties.name)
+            .addTo(map);
+    });
 
+    map.addSource('floorplan', {
+        'type': 'geojson',
+        /*
+        * Each feature in this GeoJSON file contains values for
+        * `properties.height`, `properties.base_height`,
+        * and `properties.color`.
+        * In `addLayer` you will use expressions to set the new
+        * layer's paint properties based on these values.
+        */
+        'data': geojson
+    });
+    map.addLayer({
+        'id': 'room-extrusion',
+        'type': 'fill-extrusion',
+        'source': 'floorplan',
+        'paint': {
+            // Get the `fill-extrusion-color` from the source `color` property.
+            'fill-extrusion-color': 'gray',//['get', 'color'],
+
+            // Get `fill-extrusion-height` from the source `height` property.
+            'fill-extrusion-height':1,// ['get', 'height'],
+
+            // Get `fill-extrusion-base` from the source `base_height` property.
+            'fill-extrusion-base': 0,//['get', 'base_height'],
+
+            // Make extrusions slightly opaque to see through indoor walls.
+            'fill-extrusion-opacity': 0.5
+        }
+    });
     let l = mapConfig.names.compositeLayer;
     if (api.buildings) {
         if (!map.getLayer(l)) { map.addLayer(createCompositeLayer(l)); }
     }
-    map.getCanvas().focus();
+    // map.getCanvas().focus();
     loaded_indi();
 })
     .on('click', function (e) {
         // console.log(gamestate.players[main_id].moving);
         // if (gamestate.players[main_id].moving === false) {
-
-
+        // let xx=e.lngLat.lng;
+        // let yy=e.lngLat.lat;
+        // let aa=[];
+        // let dd=0.00001;
+        // aa.push([xx-dd,yy-dd]);
+        // aa.push([xx+dd,yy-dd]);
+        // aa.push([xx+dd,yy+dd]);
+        // aa.push([xx-dd,yy+dd]);
+        // aa.push([xx-dd,yy-dd]);
+        // // console.log(geojson.features[0].geometry.coordinates);
+        // geojson.features[0].geometry.coordinates=[aa];
+        // // console.log(geojson.features[0].geometry.coordinates);
+        // map.getSource("floorplan").setData(geojson);
         Game.getCoordinates(e.lngLat.lng, e.lngLat.lat);
         // }
     })
@@ -166,6 +193,61 @@ function createLabelIcon(text) {
 
     popup.innerHTML = '<div title="' + text + '" style="font-size: 12;color: yellow;background-color:gray">' + text + '</div>';
     return popup;
+}
+
+function onObjectChanged(e) {
+    let model = e.detail.object; //here's the object already modified
+    if (api.buildings) {
+        let c = model.coordinates;
+        let point = map.project(c);
+        let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
+
+        // var bbox = [[point.x - 5, point.y - 5], [point.x + 5, point.y + 5]];
+        // var features = map.queryRenderedFeatures(bbox, { layers: ['3d-model'] });
+        if (features.length > 0) {
+            light(features[0]); // crash!
+        }
+    }
+}
+
+function light(feature) {
+    // console.log(feature);
+    fHover = feature;
+    map.setFeatureState({
+        source: fHover.source,
+        sourceLayer: fHover.sourceLayer,
+        id: fHover.id
+    }, { select: true });
+}
+function createRoom() {
+    Client.createRoom();
+}
+function startGame() {
+    loading_indi();
+    let s = document.getElementById('room_id').value;
+    let e = document.getElementById('exp_id').value;
+    if (s === "" || e === "") {
+        Client.startGame();
+    } else {
+        Client.joinGame([s, e]);
+        start_sim(s, e);
+    }
+}
+function exitGame() {
+    let s = document.getElementById('room_id').value;
+    let e = document.getElementById('exp_id').value;
+    if (s === "" || e === "") {
+    } else {
+        Client.leaveGame([s, e]);
+
+        creepM.forEach((value) => {
+            tb.remove(value);
+        })
+        creepM = new Map();
+    }
+}
+function easing(t) {
+    return t * (2 - t);
 }
 function travelPath(id, destination, run) {
     var soldier = pple.get(id);
@@ -274,35 +356,10 @@ function travelPath(id, destination, run) {
 // }
 
 
-function onObjectChanged(e) {
-    let model = e.detail.object; //here's the object already modified
-    if (api.buildings) {
-        let c = model.coordinates;
-        let point = map.project(c);
-
-        var bbox = [[point.x - 5, point.y - 5], [point.x + 5, point.y + 5]];
-        var features = map.queryRenderedFeatures(bbox, { layers: ['3d-model'] });
-        // let features = map.queryRenderedFeatures(point, { layers: ["3d-model"] });
-        if (features.length > 0) {
-            light(features[0]); // crash!
-        }
-    }
-}
-
-function light(feature) {
-    console.log(feature);
-    fHover = feature;
-    map.setFeatureState({
-        source: fHover.source,
-        sourceLayer: fHover.sourceLayer,
-        id: fHover.id
-    }, { select: true });
-}
-
 function creepPath(id, destination) {
-    var soldier = creep.get(id);
-    if (!soldier) return;
-    soldier.setCoords(soldier.coordinates);
+    var creep = creepM.get(id);
+    if (!creep) return;
+    creep.setCoords(creep.coordinates);
     var route = {
         'type': 'FeatureCollection',
         'features': [
@@ -310,7 +367,7 @@ function creepPath(id, destination) {
                 'type': 'Feature',
                 'geometry': {
                     'type': 'LineString',
-                    'coordinates': [soldier.coordinates, destination]
+                    'coordinates': [creep.coordinates, destination]
                 }
             }
         ]
@@ -335,12 +392,12 @@ function creepPath(id, destination) {
         duration: ddistance / duration * (ddistance > 0.05 ? 100000 : 200000)
     }
 
-    soldier.playAnimation(options);
+    creep.playAnimation(options);
 
-    soldier.followPath(
+    creep.followPath(
         options,
         function () {
-            soldier.setCoords(destination);
+            creep.setCoords(destination);
         }
     );
 }
@@ -416,13 +473,6 @@ let api = {
 var geojson = {
     'type': 'FeatureCollection',
     'features': [
-        {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [0, 0]
-            }
-        }
     ]
 };
 function on_connected() {
@@ -492,7 +542,7 @@ var creep_options = {
 function showCreep(geojson) {
     geojson.features.forEach((e) => {
         // console.log(e.properties.name);
-        if (creep.get(e.properties.name)) {
+        if (creepM.get(e.properties.name)) {
             var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
             // var pt = [destxx,destyy];
             creepPath(e.properties.name, dest);
@@ -509,11 +559,11 @@ function showCreep(geojson) {
                 _human1.selected = false;
                 // human1.addEventListener('ObjectChanged', onObjectChanged, false);
 
-                tb.add(_human1);
-                creep.set(e.properties.name, _human1);
+                tb.add(_human1, "3d-game");
+                creepM.set(e.properties.name, _human1);
                 // console.log(pple);
                 // init();
-                if (creep.size == geojson.features.length) {
+                if (creepM.size == geojson.features.length) {
                     loaded_indi();
                     //     start_renderer();
                 }
