@@ -47,8 +47,11 @@ var map = new mapboxgl.Map({
     pitch: mapConfig.map.pitch,
     bearing: mapConfig.map.bearing,
     attributionControl: false,
+    cooperativeGestures: true,
     antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
+map.addControl(new mapboxgl.FullscreenControl());
+
 window.tb = new Threebox(
     map,
     map.getCanvas().getContext('webgl'),
