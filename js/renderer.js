@@ -153,6 +153,31 @@ map.on('style.load', function () {
             // 'fill-extrusion-opacity': 0.5
         }
     });
+    // map.on('sourcedata', function(e) {
+
+    //     // if (e.sourceId !== 'total') return
+    //     if (e.sourceId !== 'floorplan') return
+    //     if (e.isSourceLoaded !== true) return
+
+    //     var data = {
+    //       "type": "FeatureCollection",
+    //       "features": []
+    //     }
+
+    //     // e.source.data.features.forEach(function(f) {
+    //     map.querySourceFeatures('floorplan').forEach(function(f) {
+    //       var object = turf.centerOfMass(f)
+    //       var center = object.geometry.coordinates
+    //       var radius = 1;
+    //       var options = {
+    //         steps: 4,
+    //         units: 'meters',
+    //         properties: object.properties
+    //       };
+    //       data.features.push(turf.circle(center, radius, options))
+    //     })
+    //     map.getSource('floorplan').setData(data);
+    //   })
     let l = mapConfig.names.compositeLayer;
     if (api.buildings) {
         if (!map.getLayer(l)) { map.addLayer(createCompositeLayer(l)); }
@@ -206,7 +231,8 @@ function createLabelIcon(text) {
 }
 
 function onObjectChanged(e) {
-    let model = e.detail.object; //here's the object already modified
+    if(pple.get(main_id)!==e)return;
+    let model = e;//e.detail.object; //here's the object already modified
     if (api.buildings) {
         let c = model.coordinates;
         let point = map.project(c);
@@ -230,26 +256,37 @@ function light(feature) {
             sourceLayer: fHover.sourceLayer,
             id: fHover.id
         }, { select: true });
+        // console.log(feature.properties.name);
     }
-    // console.log(feature);
 
     // new mapboxgl.Popup()
     // .setLngLat(e.lngLat)
     // .setHTML(e.features[0].properties.name)
     // .addTo(map);
 }
-function createRoom() {
-    Client.createRoom();
-}
+// function createRoom() {
+// }
 function startGame() {
-    loading_indi();
+    let ee = document.getElementById("select_host");
+    let host = ee.options[ee.selectedIndex].value;
+    console.log(host);
+    // Client.createRoom(host);
+    ee = document.getElementById("select_mode_exp");
+    let pmodel = ee.options[ee.selectedIndex].value.split("@");
+    // loading_indi();
     let s = document.getElementById('room_id').value;
     let e = document.getElementById('exp_id').value;
-    if (s === "" || e === "") {
-        Client.startGame();
+    if (s == "" || e === "") {
+        Client.startGame([host, pmodel[0], pmodel[1], 5000]);
     } else {
-        Client.joinGame([s, e]);
-        start_sim(s, e);
+        let ee = document.getElementById("select_host");
+        let host = ee.options[ee.selectedIndex].value;
+        Client.joinGame([s, e, host]);
+        gama = new GAMA("ws://localhost:6868/", "", "");
+        gama.connect();
+        gama.socket_id = s;
+        gama.exp_id = e;
+        // start_sim(s, e);
     }
 }
 function exitGame() {
@@ -294,7 +331,7 @@ function travelPath(id, destination, run) {
     };
 
     const ddistance = turf.length(route);
-    let duration = 1;
+    let duration = 1;//+ gamestate.players[id].health ;
     // console.log( ddistance );
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
@@ -485,7 +522,7 @@ let api = {
 };
 
 
-// var updateSource;
+var updater;
 // var modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
 // var experimentName = 'main';
 // var gama = new GAMA("ws://localhost:6868/", modelPath, experimentName);
@@ -498,7 +535,8 @@ function on_connected() {
     start_sim();
 }
 function on_disconnected() {
-    clearInterval(updateSource);
+    console.log("dis");
+    clearInterval(updater);
 }
 function start_sim(s, e) {
     // gama.exp_id = e;
@@ -560,9 +598,9 @@ var creep_options = {
 }
 function showCreep(geojson) {
 
-    loaded_indi();
+    // loaded_indi();
     // console.log(geojson);
-    map.getSource("floorplan").setData(geojson);
+    // map.getSource("floorplan").setData(geojson);
     // geojson.features.forEach((e) => {
     // console.log(e.properties.name);
     // if (creepM.get(e.properties.name)) {
@@ -630,38 +668,49 @@ function showCreep(geojson) {
 //         }
 //     });
 // }
-// function start_renderer() {
-//     updateSource = setInterval(() => {
-//         // if (gama.state === "play") {
-//         // gama.step(
+function start_renderer() {
+    updater = setInterval(() => {
+        // if (gama.state === "play") {
+        // gama.step( 
+            // console.log(gama);
 
-//         gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
-//             if (typeof message == "object") {
+        gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
+            // console.log(message);
+            if (typeof message == "object") {
 
-//             } else {
-//                 geojson = null;
-//                 geojson = JSON.parse(message);
-//                 // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
+            } else {
+                geojson = JSON.parse(message);
+
+                map.getSource("floorplan").setData(geojson);
+            }
+        });
+        // gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
+        //     if (typeof message == "object") {
+
+        //     } else {
+        //         geojson = null;
+        //         geojson = JSON.parse(message);
+        //         // geojson.features.forEach((e) => console.log(e.geometry.coordinates));
 
 
 
-//                 geojson.features.forEach((e) => {
-//                     // console.log(e.properties.name);
-//                     if (creep.get(e.properties.name)) {
-//                         var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
-//                         // var pt = [destxx,destyy];
-//                         creepPath(e.properties.name, dest);
-//                         // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
-//                     }
-//                 });
-//                 // console.log(pple);
-//             }
-//         });
-//         // );
+        //         geojson.features.forEach((e) => {
+        //             // console.log(e.properties.name);
+        //             if (creep.get(e.properties.name)) {
+        //                 var dest = [e.geometry.coordinates[0], e.geometry.coordinates[1]];
+        //                 // var pt = [destxx,destyy];
+        //                 creepPath(e.properties.name, dest);
+        //                 // creep.get(e.properties.name).setCoords([e.geometry.coordinates[0], e.geometry.coordinates[1]]);
+        //             }
+        //         });
+        //         // console.log(pple);
+        //     }
+        // });
+        // );
 
-//         // }
-//     }, 5000);
-// }
+        // }
+    }, 1000);
+}
 
 function loading_indi() {
     document.getElementById('loadani').innerHTML = '<div class="loading">Loading</div>';

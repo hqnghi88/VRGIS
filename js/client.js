@@ -10,8 +10,8 @@ Client.sendTest = function () {
     console.log("test sent");
     Client.socket.emit('test');
 };
-Client.startGame= function(){
-    Client.socket.emit('startGame');
+Client.startGame= function(data){
+    Client.socket.emit('startGame',data);
 };
 Client.joinGame= function(data){
     Client.socket.emit('joinGame',data);
@@ -22,9 +22,9 @@ Client.leaveGame= function(data){
 Client.killAgent= function(data){
     Client.socket.emit('killAgent',data);
 };
-Client.createRoom= function(){
-    Client.socket.emit('createRoom');
-};
+// Client.createRoom= function(data){
+//     Client.socket.emit('createRoom',data);
+// };
 Client.askNewPlayer = function () {
     Client.socket.emit('newplayer');
 };
@@ -51,18 +51,18 @@ Client.socket.on('allplayers', function (data) {
         Game.addNewPlayer(data[i].id, data[i].ori, data[i].dest);
     }
 
-    Client.socket.on('room', function (data) { 
-        Game.showRoom(data);
-    });
+    // Client.socket.on('room', function (data) { 
+    //     Game.showRoom(data);
+    // });
     Client.socket.on('intoRoom', function (data) { 
         Game.intoRoom(data);
     });
     Client.socket.on('outRoom', function (data) { 
         Game.outRoom(data);
     });
-    Client.socket.on('exitRoom', function (data) { 
-        Game.exitRoom(data);
-    });
+    // Client.socket.on('exitRoom', function (data) { 
+    //     Game.exitRoom(data);
+    // });
     Client.socket.on('started', function (data) { 
         Game.startGame(data);
     });

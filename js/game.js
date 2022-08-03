@@ -55,7 +55,7 @@ Game.addNewPlayer = function (id, o, d) {
         msgtimeout: '',
         // x: -73.979681 + Math.random() / 10000,
         // y: 40.6974881 + Math.random() / 10000,
-        health: 100,
+        health: 0,
         username: `Player${id}`,
         color: "#" + Math.floor(id * 16777215).toString(16)
     }
@@ -85,10 +85,11 @@ Game.addNewPlayer = function (id, o, d) {
         _human1.addLabel(createLabelIcon("Player" + id), true);//, _human1.anchor, 1.5);
         _human1.castShadow = true;
         _human1.selected = false;
+        if(id===main_id){
+            // _human1.addEventListener('ObjectChanged', onObjectChanged, false);
+        }
 
-        _human1.addEventListener('ObjectChanged', onObjectChanged, false);
-
-        tb.add(_human1,"3d-model");
+        tb.add(_human1, "3d-model");
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
         pple.set(id, _human1);
         _human1.playAnimation({ animation: 0, duration: 100000000000 });
@@ -120,19 +121,19 @@ Game.movePlayer = function (id, dest) {
     } else {
         gamestate.players[id].dest = dest;
         // var pt = [destxx,destyy];
-        travelPath(id, dest,false);
+        travelPath(id, dest, false);
         // pple.forEach((human) => { 
         //     travelPath(human.dest);
         // });
     }
 };
-Game.updatePosition = function (id, dest) { 
+Game.updatePosition = function (id, dest) {
     var soldier = pple.get(id);
     if (!soldier) return;
     // console.log(id);
     gamestate.players[id].ori = dest;
     gamestate.players[id].dest = dest;
-    soldier.setCoords(dest); 
+    soldier.setCoords(dest);
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
     // tb.update();
     // map.triggerRepaint();
@@ -145,6 +146,7 @@ Game.intoRoom = function (data) {
     soldier.setCoords(data);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
+    start_renderer();
 }
 Game.outRoom = function (data) {
     var soldier = pple.get(main_id);
@@ -152,18 +154,33 @@ Game.outRoom = function (data) {
     soldier.setCoords(data);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
+    
+    clearInterval(updater);
 }
-Game.showRoom = function (data) {
-    document.getElementById('room_id').value = data.room[0];
-    document.getElementById('exp_id').value = "";
-}
+// Game.showRoom = function (data) {
+//     document.getElementById('room_id').value = data.room[0];
+//     document.getElementById('exp_id').value = "";
+// }
 Game.allCreep = function (data) {
-    showCreep(data.creep);
+    // showCreep(data.creep);
+    
+    gamestate.players[data.id].health = gamestate.players[data.id].health+1;
+    // console.log(gamestate.players[data.id].health);
+    var soldier = pple.get(data.id);
+    if (!soldier) return;
+    soldier.setScale(3+(gamestate.players[data.id].health/1));
+    
+    // start_renderer();
 }
 Game.startGame = function (data) {
     document.getElementById('room_id').value = data.room[0];
     document.getElementById('exp_id').value = data.room[1];
+    gama = new GAMA("ws://localhost:6868/", "", ""); 
+    gama.connect();
 
+    gama.socket_id = data.room[0];
+    gama.exp_id = data.room[1];
+    start_renderer();
     var soldier = pple.get(main_id);
     if (!soldier) return;
     soldier.setCoords(data.roomloc);

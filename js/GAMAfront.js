@@ -1,3 +1,4 @@
+// const WebSocket = require('ws');
 class GAMA {
     host = "";
     modelPath = 'gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
@@ -29,34 +30,36 @@ class GAMA {
             clearInterval(this.executor);
             if (closed_callback) closed_callback();
         };
-        this.wSocket.addEventListener('open', (event) => {
-            if (opened_callback) opened_callback();
-        });
-        this.executor = setInterval(() => {
-            if (this.queue.length > 0 && this.req === "") {
-                // console.log(this.queue);
-                this.req = this.queue.shift();
-                this.req.exp_id = this.exp_id;
-                this.req.socket_id = this.socket_id;
-                // console.log(this.req);
-                this.wSocket.send(JSON.stringify(this.req));
-                // console.log("request " + JSON.stringify(this.req));
-                if (this.logger) { this.logger("request " + JSON.stringify(this.req)); }
-                var myself = this;
-                this.wSocket.onmessage = function (event) {
-                    // console.log(myself.req);
-                    if (event.data instanceof Blob) { } else {
-
-                    // if (typeof event.data != "object") {
-                        if (myself.req.callback) {
-                            myself.req.callback(event.data);
-                        }
-                        myself.endRequest();
+        this.wSocket.onerror=function(event){
+            console.log("Error: "+event.message);
+        }
+        this.wSocket.addEventListener('open', () => {
+            this.wSocket.onmessage = (event)=>  {
+                this.executor = setInterval(() => {
+                    if (this.queue.length > 0 && this.req === "") {
+                        // console.log(this.queue);
+                        this.req = this.queue.shift();
+                        this.req.exp_id = this.exp_id;
+                        this.req.socket_id = this.socket_id;
+                        // console.log(this.req);
+                        this.wSocket.send(JSON.stringify(this.req));
+                        // console.log("request " + JSON.stringify(this.req));
+                        if (this.logger) { this.logger("request " + JSON.stringify(this.req)); }
+                        var myself = this;
+                        this.wSocket.onmessage = function (event) {
+                            if (typeof event.data != "object") {
+                                if (myself.req.callback) {
+                                    myself.req.callback(event.data);
+                                }
+                                myself.endRequest();
+                            }
+                        };
                     }
-                };
-            }
 
-        }, this.executor_speed);
+                }, this.executor_speed);
+                if (opened_callback) opened_callback(event);
+            };
+        });
     }
 
     requestCommand(cmd) {
@@ -122,8 +125,8 @@ class GAMA {
             if (result.exp_id) myself.exp_id = result.exp_id;
             if (result.socket_id) myself.socket_id = result.socket_id;
 
-            // if(c) c();
-            myself.play(c);
+            if(c) c();
+            // myself.play(c);
         });
     }
     play(c) {
@@ -152,4 +155,5 @@ class GAMA {
         if (c) c();
     }
 
-}  
+}
+// exports.GAMA = GAMA;

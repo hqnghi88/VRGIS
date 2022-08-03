@@ -1919,6 +1919,8 @@ AnimationManager.prototype = {
 						}
 
 						object._setObject(objectState);
+						
+						onObjectChanged(object);
 						// console.log(geojson.features[0].geometry.coordinates);
 						// if(object.label.element.innerText.startsWith("Gama")){
 						// 	let url = $.grep(geojson.features, function(item) { return item.id === object.id })[0];

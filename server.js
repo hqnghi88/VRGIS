@@ -59,6 +59,8 @@ server.listen(process.env.PORT || 80, function () {
 
 var players = new Map();
 var roomloc = new Map();
+var gamahost = new Map();
+var updaterhost = new Map();
 io.on('connection', function (socket) {
     socket.on('newplayer', function () {
         console.log("newplayer " + server.lastPlayderID);//[105.771453381, 10.022111449]
@@ -82,108 +84,66 @@ io.on('connection', function (socket) {
         socket.emit('mainplayer', socket.player);
         socket.broadcast.emit('newplayer', socket.player);
 
-        var gama;//= new gamalib.GAMA("ws://localhost:6868/", "", "");
-        var updateSource;
-        socket.on('createRoom', function (data) {
-            // gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
-            // gama.experimentName = 'main';
-            // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
-            // gama.executor_speed=100;
+        // socket.on('closeRoom', function (data) {
+        //     clearInterval(updateSource);
+        //     if (gama && gama.wSocket) {
+        //         gama.wSocket.close();
+        //     }
+        //     gama = null;
+        //     io.emit('exitRoom', socket.player.id);
+        // });
+        socket.on('startGame', function (data) { 
 
-            clearInterval(updateSource);
-            if (gama && gama.wSocket) {
-                gama.wSocket.close();
-            }
-            gama = null;
-            gama = new gamalib.GAMA("ws://localhost:6868/", "", "");
+            // console.log(data);
+            var gama = new gamalib.GAMA(data[0], data[1], data[2]);//"ws://localhost:6868/" 
             gama.connect(
-                function (e) {
-                    gama.socket_id = e.data;
-                    var roomid = socket.player.room[0] + "" + socket.player.room[1];
-                    roomloc.delete(roomid);
-                    socket.player.room = [gama.socket_id, gama.exp_id];
-                    io.emit('room', socket.player);
-                }, function () { });
+                function (e) { 
+                    gama.launch(
+                        function (e) {
+                            // console.log(e);
+                            gama.evalExpr("CRS_transform(world.location,\"EPSG:4326\")", function (ee) {
+                                // console.log(ee);
+                                ee = JSON.parse(ee).result.replace(/[{}]/g, "");
+                                var eee = ee.split(",");
+                                socket.player.room = [gama.socket_id, gama.exp_id];
+                                var roomid = socket.player.room[0] + "" + socket.player.room[1];
+                                socket.player.roomloc = [eee[0], eee[1]];
+                                roomloc.delete(roomid);
+                                roomloc.set(roomid, socket.player.roomloc);
+                                socket.player.ori = [eee[0], eee[1]];
+                                socket.player.dest = [eee[0], eee[1]];
+                                io.emit('updatePosition', socket.player);
+                                socket.join(roomid);
+                                io.sockets.in(roomid).emit('started', socket.player);
 
-        });
-        socket.on('closeRoom', function (data) {
-            clearInterval(updateSource);
-            if (gama && gama.wSocket) {
-                gama.wSocket.close();
-            }
-            gama = null;
-            io.emit('exitRoom', socket.player.id);
-        });
-        socket.on('startGame', function (data) {
-            // gama.modelPath = 'C:/git/Drafts/hanman/models/simple.gaml';
-            // gama.experimentName = 'main';
+                                gamahost.set(roomid, gama);
+                                var updateSource = setInterval(() => {
+                                    if(gamahost.get(socket.player.room[0] + "" + socket.player.room[1])){
+                                        gamahost.get(socket.player.room[0] + "" + socket.player.room[1]).step();
+                                    }
+                                }, data[3]);
+                                updaterhost.set(roomid, updateSource);
+                            });
 
-
-            console.log("gama of " + gama);
-            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
-            // gama.experimentName = 'road_traffic';
-            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Toy Models/Circle/Circle.gaml';
-            // gama.experimentName = 'main';
-            // gama.modelPath = 'C:/git/gama/msi.gama.models/models/Modeling/Model Coupling/Co-PreyPredator/Prey Predator.gaml';
-            // gama.experimentName = 'Prey Predator Exp';
-            gama.modelPath = 'C:/git/gama/msi.gama.models/models/Tutorials/Predator Prey/models/Model 06.gaml';
-            gama.experimentName = 'prey_predator';
-            // gama.modelPath = '/Users/hqn88/git/gama/msi.gama.models/models/Tutorials/Road Traffic/models/Model 05.gaml';
-            // gama.experimentName = 'road_traffic';
-            // gama = new GAMA("ws://51.255.46.42:6001/", modelPath, experimentName);
-            // gama.executor_speed=100;
-            gama.launch(
-                function (e) {
-                    // console.log(e);
-                    gama.evalExpr("CRS_transform(world.location,\"EPSG:4326\")", function (ee) {
-                        // console.log(ee);
-                        ee = JSON.parse(ee).result.replace(/[{}]/g, "");
-                        var eee = ee.split(",");
-                        socket.player.room = [gama.socket_id, gama.exp_id];
-                        var roomid = socket.player.room[0] + "" + socket.player.room[1];
-                        socket.player.roomloc = [eee[0], eee[1]];
-                        roomloc.set(roomid, socket.player.roomloc);
-                        socket.player.ori = [eee[0], eee[1]];
-                        socket.player.dest = [eee[0], eee[1]];
-                        io.emit('updatePosition', socket.player);
-                        socket.join(roomid);
-                        io.sockets.in(roomid).emit('started', socket.player);
-                    });
-
-                    console.log("updateSource of " + socket.player.id);
-                    updateSource = setInterval(() => {
-                        // if (gama.state === "play") {
-                        // gama.step(
-                        gama.step(
-                            gama.getPopulation("prey", ["name","color"], "EPSG:4326", function (message) {
-                                if (typeof message == "object") {
-    
-                                } else {
-                                    socket.player.creep = JSON.parse(message);
-                                    io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
-                                }
-                            })
-                        );
-                        // );
-
-                        // }
-                    }, 10000);
+                        });
                 }, function () { });
 
 
+
         });
 
-        socket.on('killAgent', function (data) { 
-            gama.evalExpr('ask prey where(each.name="'+data+'"){do die;}', function (ee) {
-                // console.log(ee); 
-                gama.getPopulation("prey", ["name","color"], "EPSG:4326", function (message) {
-                    if (typeof message == "object") {
+        socket.on('killAgent', function (data) {
+            let roomid = socket.player.room[0] + "" + socket.player.room[1];
+            gamahost.get(roomid).evalExpr('ask prey where(each.name="' + data + '"){do die;}', function (ee) {
+                // console.log(ee);
+                // gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
+                //     if (typeof message == "object") {
 
-                    } else {
-                        socket.player.creep = JSON.parse(message);
-                        io.sockets.in(socket.player.room[0] + "" + socket.player.room[1]).emit('allCreep', socket.player);
-                    }
-                })
+                //     } else {
+                //         socket.player.creep = JSON.parse(message);
+                io.sockets.in(roomid).emit('allCreep', socket.player);
+                //     }
+                // })
             });
         });
         socket.on('joinGame', function (data) {
@@ -192,6 +152,13 @@ io.on('connection', function (socket) {
             socket.player.outroom = socket.player.ori;
             socket.player.ori = roomloc.get(socket.player.room[0] + "" + socket.player.room[1]);
             socket.player.dest = socket.player.ori;
+            // clearInterval(updateSource);
+            // if (gama && gama.wSocket) {
+            //     gama.wSocket.close();
+            // }
+            // gama = null;
+            // gama = new gamalib.GAMA("ws://localhost:6868/", "", "");//"ws://localhost:6868/"
+            // gama.connect();
             io.emit('updatePosition', socket.player);
             socket.emit("intoRoom", socket.player.ori);
         });
@@ -199,6 +166,10 @@ io.on('connection', function (socket) {
             socket.leave(data[0] + "" + data[1]);
             socket.player.ori = socket.player.outroom;
             socket.player.dest = socket.player.outroom;
+            // clearInterval(updateSource);
+            // if (gama && gama.wSocket) {
+            //     gama.wSocket.close();
+            // }
             io.emit('updatePosition', socket.player);
             socket.emit("outRoom", socket.player.ori);
         });
@@ -217,11 +188,13 @@ io.on('connection', function (socket) {
         });
 
         socket.on('disconnect', function () {
-            clearInterval(updateSource);
-            if (gama && gama.wSocket) {
-                gama.wSocket.close();
-            }
-            gama = null;
+            // let room_id=socket.player.room[0] + "" + socket.player.room[1];
+            // clearInterval(updaterhost.get(room_id));
+            // if (gamahost.get(room_id) && gamahost.get(room_id).wSocket) {
+            //     gamahost.get(room_id).wSocket.close();
+            // }
+            // gamahost.delete(room_id);
+            // updaterhost.delete(room_id);
             io.emit('remove', socket.player.id);
             players.delete(socket.player.id);
         });
