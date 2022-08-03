@@ -282,7 +282,7 @@ function startGame() {
         let ee = document.getElementById("select_host");
         let host = ee.options[ee.selectedIndex].value;
         Client.joinGame([s, e, host]);
-        gama = new GAMA("ws://localhost:6868/", "", "");
+        gama = new GAMA(host, "", "");
         gama.connect();
         gama.socket_id = s;
         gama.exp_id = e;

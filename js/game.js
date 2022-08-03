@@ -175,7 +175,9 @@ Game.allCreep = function (data) {
 Game.startGame = function (data) {
     document.getElementById('room_id').value = data.room[0];
     document.getElementById('exp_id').value = data.room[1];
-    gama = new GAMA("ws://localhost:6868/", "", ""); 
+    let ee = document.getElementById("select_host");
+    let host = ee.options[ee.selectedIndex].value;
+    gama = new GAMA(host, "", ""); 
     gama.connect();
 
     gama.socket_id = data.room[0];
