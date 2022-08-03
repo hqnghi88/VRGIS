@@ -41,6 +41,7 @@ var map = new mapboxgl.Map({
     // style: "https://wasac.github.io/mapbox-stylefiles/unvt/style.json",
 
     maxZoom: 25,
+    // projection: 'globe',
     zoom: mapConfig.map.zoom,
     center: mapConfig.map.center,
     pitch: mapConfig.map.pitch,
