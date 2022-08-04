@@ -235,34 +235,47 @@ function createLabelIcon(text) {
 }
 
 function onObjectChanged(e) {
-    if(pple.get(main_id)!==e)return;
+    if (pple.get(main_id) !== e) return;
     let model = e;//e.detail.object; //here's the object already modified
     if (api.buildings) {
         let c = model.coordinates;
         let point = map.project(c);
-        let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
+        // let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
 
-        // let dd = 0.0005;
-        // var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
-        // var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
+        let dd = 20;
+        var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
+        var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
         if (features.length > 0) {
-            light(features[0]); // crash! 
+            // console.log(features);
+            features.forEach(e => {
+                light(e);
+            });  
         }
     }
 }
 
 function light(feature) {
-    if (!feature.state.select) {
+    // if (!feature.state.select) {
         Client.killAgent(feature.properties.name);
-        fHover = feature;
         map.setFeatureState({
-            source: fHover.source,
-            sourceLayer: fHover.sourceLayer,
-            id: fHover.id
+            source: feature.source,
+            sourceLayer: feature.sourceLayer,
+            id: feature.id
         }, { select: true });
-        // console.log(feature.properties.name);
-    }
+        // console.log(e);
+        geojson.features.forEach(function (item, index) {
+            if (item["id"] === "" + feature.id) {
+                geojson.features.splice(index, 1);
+                map.getSource("floorplan").setData(geojson);
+            }
+        });
+        // geojson.features.pop(e);
+        // console.log(geojson.features);
+        // geojson.features = geojson.features.filter(val => val.id !== e.id)
 
+        // delete geojson.features[e.id]; 
+    // }
+    // console.log(feature.properties.name);
     // new mapboxgl.Popup()
     // .setLngLat(e.lngLat)
     // .setHTML(e.features[0].properties.name)
@@ -335,7 +348,7 @@ function travelPath(id, destination, run) {
     };
 
     const ddistance = turf.length(route);
-    let duration = 1;//+ gamestate.players[id].health ;
+    let duration = 1+ gamestate.players[id].health/1000 ;
     // console.log( ddistance );
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
@@ -672,20 +685,25 @@ function showCreep(geojson) {
 //         }
 //     });
 // }
-function start_renderer() {
+function start_renderer() { 
     updater = setInterval(() => {
         // if (gama.state === "play") {
         // gama.step( 
-            // console.log(gama);
+        // console.log(gama);
 
         gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
             // console.log(message);
             if (typeof message == "object") {
 
             } else {
-                geojson = JSON.parse(message);
+                try {
+                    geojson = JSON.parse(message);
 
-                map.getSource("floorplan").setData(geojson);
+                    map.getSource("floorplan").setData(geojson);
+                } catch (e) {
+                    console.log('Error occured: '+e);
+                    // throw new Error('Error occured: ', e);
+                }
             }
         });
         // gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {

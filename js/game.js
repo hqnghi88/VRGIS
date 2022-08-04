@@ -67,7 +67,7 @@ Game.addNewPlayer = function (id, o, d) {
         // obj:"models/untitled.glb",
         // type:'gltf',
         // obj:"models/Soldier.gltf",
-        scale: 3,
+        scale: 1,
         units: 'meters',
         rotation: { x: 90, y: 0, z: 0 },
         anchor: 'top',
@@ -87,8 +87,9 @@ Game.addNewPlayer = function (id, o, d) {
         _human1.selected = false;
         if(id===main_id){
             // _human1.addEventListener('ObjectChanged', onObjectChanged, false);
-        }
-
+        } 
+        _human1.userData.scale=0.07;
+        _human1.setScale();
         tb.add(_human1, "3d-model");
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
         pple.set(id, _human1);
@@ -151,6 +152,9 @@ Game.intoRoom = function (data) {
 Game.outRoom = function (data) {
     var soldier = pple.get(main_id);
     if (!soldier) return;
+    gamestate.players[main_id].health = 0;
+    soldier.userData.scale=0.07;
+    soldier.setScale();
     soldier.setCoords(data);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
@@ -167,9 +171,11 @@ Game.allCreep = function (data) {
     gamestate.players[data.id].health = gamestate.players[data.id].health+1;
     // console.log(gamestate.players[data.id].health);
     var soldier = pple.get(data.id);
-    if (!soldier) return;
-    soldier.setScale(3+(gamestate.players[data.id].health/1));
+    if (!soldier) return;  
     
+    soldier.userData.scale=0.07+gamestate.players[data.id].health/10000;
+    soldier.setScale();
+    //   tb.update();
     // start_renderer();
 }
 Game.startGame = function (data) {
@@ -185,6 +191,7 @@ Game.startGame = function (data) {
     start_renderer();
     var soldier = pple.get(main_id);
     if (!soldier) return;
+    gamestate.players[data.id].health = 0;
     soldier.setCoords(data.roomloc);
 
     centerSoldier();
