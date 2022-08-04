@@ -242,39 +242,43 @@ function onObjectChanged(e) {
         let point = map.project(c);
         // let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
 
-        let dd = 20;
+        let dd = 100;
         var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
         var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
         if (features.length > 0) {
             // console.log(features);
+            var pna = [];
             features.forEach(e => {
-                light(e);
-            });  
+                if (!e.state.select) {
+                    pna.push(e.properties.name);
+                    light(e);
+                }
+            });
+            if (pna.length > 0) {
+                Client.killAgent(pna);
+            }
         }
     }
 }
 
 function light(feature) {
-    // if (!feature.state.select) {
-        Client.killAgent(feature.properties.name);
-        map.setFeatureState({
-            source: feature.source,
-            sourceLayer: feature.sourceLayer,
-            id: feature.id
-        }, { select: true });
-        // console.log(e);
-        geojson.features.forEach(function (item, index) {
-            if (item["id"] === "" + feature.id) {
-                geojson.features.splice(index, 1);
-                map.getSource("floorplan").setData(geojson);
-            }
-        });
-        // geojson.features.pop(e);
-        // console.log(geojson.features);
-        // geojson.features = geojson.features.filter(val => val.id !== e.id)
+    map.setFeatureState({
+        source: feature.source,
+        sourceLayer: feature.sourceLayer,
+        id: feature.id
+    }, { select: true });
+    // console.log(e);
+    geojson.features.forEach(function (item, index) {
+        if (("" + item["id"]) === ("" + feature.id)) {
+            geojson.features.splice(index, 1);
+            map.getSource("floorplan").setData(geojson);
+        }
+    });
+    // geojson.features.pop(e);
+    // console.log(geojson.features);
+    // geojson.features = geojson.features.filter(val => val.id !== e.id)
 
-        // delete geojson.features[e.id]; 
-    // }
+    // delete geojson.features[e.id]; 
     // console.log(feature.properties.name);
     // new mapboxgl.Popup()
     // .setLngLat(e.lngLat)
@@ -348,7 +352,7 @@ function travelPath(id, destination, run) {
     };
 
     const ddistance = turf.length(route);
-    let duration = 1+ gamestate.players[id].health/1000 ;
+    let duration = 1 + gamestate.players[id].health / 1000;
     // console.log( ddistance );
     // console.log( ddistance/duration*200000);
     // extract path geometry from callback geojson, and set duration of travel
@@ -685,7 +689,7 @@ function showCreep(geojson) {
 //         }
 //     });
 // }
-function start_renderer() { 
+function start_renderer() {
     updater = setInterval(() => {
         // if (gama.state === "play") {
         // gama.step( 
@@ -701,7 +705,7 @@ function start_renderer() {
 
                     map.getSource("floorplan").setData(geojson);
                 } catch (e) {
-                    console.log('Error occured: '+e);
+                    console.log('Error occured: ' + e);
                     // throw new Error('Error occured: ', e);
                 }
             }
@@ -731,7 +735,7 @@ function start_renderer() {
         // );
 
         // }
-    }, 1000);
+    }, 5000);
 }
 
 function loading_indi() {

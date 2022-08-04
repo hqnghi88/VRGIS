@@ -150,12 +150,13 @@ Game.intoRoom = function (data) {
     start_renderer();
 }
 Game.outRoom = function (data) {
+    gamestate.players[data.id].health = 0;
     var soldier = pple.get(main_id);
     if (!soldier) return;
     gamestate.players[main_id].health = 0;
     soldier.userData.scale=0.07;
     soldier.setScale();
-    soldier.setCoords(data);
+    soldier.setCoords(data.ori);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
     
@@ -168,8 +169,8 @@ Game.outRoom = function (data) {
 Game.allCreep = function (data) {
     // showCreep(data.creep);
     
-    gamestate.players[data.id].health = gamestate.players[data.id].health+1;
-    // console.log(gamestate.players[data.id].health);
+    gamestate.players[data.id].health = data.health;
+    console.log(gamestate.players[data.id].health);
     var soldier = pple.get(data.id);
     if (!soldier) return;  
     
