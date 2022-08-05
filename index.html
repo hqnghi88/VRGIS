@@ -74,12 +74,20 @@
 					<input id="room-start" type="button" value="Start" style="width: 100px;" onclick="startGame()">
 					<input id="room-leave" type="button" value="Exit" style="width: 100px;" onclick="exitGame()">
 					<div></div>
-					<input id="room_id" type="text" name="room_id" style="width: 70px;">
-					<input id="exp_id" type="text" name="exp_id" style="width: 70px;">
+					Room:<select id="select_room_id" className="form-control" name="room_id"> 
+					</select>
+					<!-- <input id="room_id" type="text" name="room_id" style="width: 70px;">
+					<input id="exp_id" type="text" name="exp_id" style="width: 70px;"> -->
 					<div></div>
 					<input id="filter-center" type="button" value="[   ]" style="width: 40px;"
 						onclick="centerSoldier()">
 					<input id="filter-input" type="text" name="filter" placeholder="Chatbox">
+					<input id="filter-send" type="button" value="⏎" style="width: 40px;"
+						onclick="sendchat(filterInput.value.trim().toLowerCase());">
+					<div>
+
+						<textarea  rows="4" cols="32" id="console"></textarea>
+					</div>
 					<!-- </div> -->
 				</td>
 			</tr>

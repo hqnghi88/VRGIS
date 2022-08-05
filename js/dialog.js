@@ -79,3 +79,24 @@ $('#' + 'dialog_window_2').dialog("widget").find(".ui-dialog-titlebar-close").hi
 $('#' + 'dialog_window_2').parent().css({ left: 0, top: 0 });
 $('#new_window_title').val('');
 $('#new_window_content').val('');
+
+
+$.fn.scrollBottom = function () {
+    return $(this).scrollTop($(this)[0].scrollHeight);
+};
+
+
+const filterInput = document.getElementById('filter-input');
+filterInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        
+        sendchat(e.target.value.trim().toLowerCase());
+    }
+});
+function sendchat(value){
+    if (value !== "") {
+        Client.sendMessage(value);
+        // console.log("send chat " + value);
+    }
+    filterInput.value = "";
+}

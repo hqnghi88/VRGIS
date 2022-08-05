@@ -45,6 +45,9 @@ Client.socket.on('mainplayer',function(data){
     // console.log(main_id);
     // Game.addNewPlayer(data.id,data.x,data.y);
 });
+Client.socket.on('updateRoomList', function (data) {
+    Game.updateRoomList(data);
+});
 
 Client.socket.on('allplayers', function (data) {
     for (var i = 0; i < data.length; i++) {

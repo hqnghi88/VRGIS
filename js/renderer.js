@@ -214,17 +214,6 @@ map.on('style.load', function () {
     //   })
     ;
 map.doubleClickZoom.disable();
-const filterInput = document.getElementById('filter-input');
-filterInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        const value = e.target.value.trim().toLowerCase();
-        if (value !== "") {
-            Client.sendMessage(value);
-            // console.log("send chat " + value);
-        }
-        filterInput.value = "";
-    }
-});
 
 function createLabelIcon(text) {
     let popup = document.createElement('div');
@@ -287,6 +276,8 @@ function light(feature) {
 }
 // function createRoom() {
 // }
+
+
 function startGame() {
     let ee = document.getElementById("select_host");
     let host = ee.options[ee.selectedIndex].value;
@@ -295,8 +286,10 @@ function startGame() {
     ee = document.getElementById("select_mode_exp");
     let pmodel = ee.options[ee.selectedIndex].value.split("@");
     // loading_indi();
-    let s = document.getElementById('room_id').value;
-    let e = document.getElementById('exp_id').value;
+
+    ee = document.getElementById("select_room_id").value.split("@");
+    let s = ee[0];
+    let e = ee[1];
     if (s == "" || e === "") {
         Client.startGame([host, pmodel[0], pmodel[1], 5000]);
     } else {
@@ -311,8 +304,9 @@ function startGame() {
     }
 }
 function exitGame() {
-    let s = document.getElementById('room_id').value;
-    let e = document.getElementById('exp_id').value;
+    let ee = document.getElementById("select_room_id").value.split("@");
+    let s = ee[0];
+    let e = ee[1];
     if (s === "" || e === "") {
     } else {
         Client.leaveGame([s, e]);

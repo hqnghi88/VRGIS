@@ -58,7 +58,7 @@ server.listen(process.env.PORT || 80, function () {
 
 
 var players = new Map();
-var roomloc = new Map();
+var roomlst = new Map();
 var gamahost = new Map();
 var updaterhost = new Map();
 io.on('connection', function (socket) {
@@ -107,20 +107,21 @@ io.on('connection', function (socket) {
                                 ee = JSON.parse(ee).result.replace(/[{}]/g, "");
                                 var eee = ee.split(",");
                                 socket.player.room = [gama.socket_id, gama.exp_id];
-                                var roomid = socket.player.room[0] + "" + socket.player.room[1];
+                                var roomid = socket.player.room[0] + "@" + socket.player.room[1];
                                 socket.player.roomloc = [eee[0], eee[1]];
-                                roomloc.delete(roomid);
-                                roomloc.set(roomid, socket.player.roomloc);
+                                roomlst.delete(roomid);
+                                roomlst.set(roomid, socket.player.roomloc);
                                 socket.player.ori = [eee[0]+ Math.random() / 10000, eee[1]+ Math.random() / 10000];
                                 socket.player.dest = socket.player.ori;
-                                io.emit('updatePosition', socket.player);
+                                io.emit('updatePosition', socket.player); 
+                                io.emit('updateRoomList', [...roomlst.keys()]);
                                 socket.join(roomid);
                                 io.sockets.in(roomid).emit('started', socket.player);
 
                                 gamahost.set(roomid, gama);
                                 var updateSource = setInterval(() => {
-                                    if(gamahost.get(socket.player.room[0] + "" + socket.player.room[1])){
-                                        gamahost.get(socket.player.room[0] + "" + socket.player.room[1]).step();
+                                    if(gamahost.get(socket.player.room[0] + "@" + socket.player.room[1])){
+                                        gamahost.get(socket.player.room[0] + "@" + socket.player.room[1]).step();
                                     }
                                 }, data[3]);
                                 updaterhost.set(roomid, updateSource);
@@ -134,7 +135,7 @@ io.on('connection', function (socket) {
         });
 
         socket.on('killAgent', function (data) {
-            let roomid = socket.player.room[0] + "" + socket.player.room[1];
+            let roomid = socket.player.room[0] + "@" + socket.player.room[1];
             let sss=data.toString().replace(/,/g,'","');
             // console.log('ask prey where(each.name in ["' +  sss+ '"]){do die;}');
             gamahost.get(roomid).evalExpr('ask prey where(each.name in ["' + sss + '"]){do die;}', function (ee) {
@@ -152,7 +153,7 @@ io.on('connection', function (socket) {
             socket.join(data[0] + "" + data[1]);
             socket.player.room = [data[0], data[1]];
             socket.player.outroom = socket.player.ori;
-            socket.player.ori = roomloc.get(socket.player.room[0] + "" + socket.player.room[1]);
+            socket.player.ori = roomlst.get(socket.player.room[0] + "@" + socket.player.room[1]);
             socket.player.dest = socket.player.ori;
             // clearInterval(updateSource);
             // if (gama && gama.wSocket) {
@@ -162,7 +163,7 @@ io.on('connection', function (socket) {
             // gama = new gamalib.GAMA("ws://localhost:6868/", "", "");//"ws://localhost:6868/"
             // gama.connect();
             io.emit('updatePosition', socket.player);
-            socket.emit("intoRoom", socket.player.ori);
+            socket.emit("intoRoom", socket.player);
         });
         socket.on('leaveGame', function (data) {
             socket.leave(data[0] + "" + data[1]);
@@ -191,7 +192,7 @@ io.on('connection', function (socket) {
         });
 
         socket.on('disconnect', function () {
-            // let room_id=socket.player.room[0] + "" + socket.player.room[1];
+            // let room_id=socket.player.room[0] + "@" + socket.player.room[1];
             // clearInterval(updaterhost.get(room_id));
             // if (gamahost.get(room_id) && gamahost.get(room_id).wSocket) {
             //     gamahost.get(room_id).wSocket.close();

@@ -85,10 +85,10 @@ Game.addNewPlayer = function (id, o, d) {
         _human1.addLabel(createLabelIcon("Player" + id), true);//, _human1.anchor, 1.5);
         _human1.castShadow = true;
         _human1.selected = false;
-        if(id===main_id){
+        if (id === main_id) {
             // _human1.addEventListener('ObjectChanged', onObjectChanged, false);
-        } 
-        _human1.userData.scale=0.07;
+        }
+        _human1.userData.scale = 0.07;
         _human1.setScale();
         tb.add(_human1, "3d-model");
         // _human1.playAnimation({ animation: 3, duration: 100000000 });
@@ -128,6 +128,29 @@ Game.movePlayer = function (id, dest) {
         // });
     }
 };
+Game.updateRoomList = function (data) {
+    let curr=document.getElementById("select_room_id").value;
+    $("#select_room_id").empty();
+    let exe = document.getElementById("select_room_id"); 
+    var option = document.createElement("option");
+    option.value = ""; 
+    option.text = "";
+    exe.add(option);
+    data.forEach((e)=>{
+        let exe = document.getElementById("select_room_id"); 
+        var option = document.createElement("option");
+        option.value = e; 
+        option.text = e;
+        exe.add(option);
+    }); 
+        document.getElementById("select_room_id").value=curr; 
+    // let exe = document.getElementById("select_room_id"); 
+    // var option = document.createElement("option");
+    // option.value = "hand"; 
+    // option.text = "Hand";
+    // exe.add(option);
+    // // exe.length = 0;
+};
 Game.updatePosition = function (id, dest) {
     var soldier = pple.get(id);
     if (!soldier) return;
@@ -142,9 +165,10 @@ Game.updatePosition = function (id, dest) {
 };
 
 Game.intoRoom = function (data) {
+    document.getElementById("select_room_id").value=data.room[0]+"@"+data.room[1];
     var soldier = pple.get(main_id);
     if (!soldier) return;
-    soldier.setCoords(data);
+    soldier.setCoords(data.ori);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
     start_renderer();
@@ -154,12 +178,12 @@ Game.outRoom = function (data) {
     var soldier = pple.get(main_id);
     if (!soldier) return;
     gamestate.players[main_id].health = 0;
-    soldier.userData.scale=0.07;
+    soldier.userData.scale = 0.07;
     soldier.setScale();
     soldier.setCoords(data.ori);
     centerSoldier();
     soldier.playAnimation({ animation: 0, duration: 100000000000 });
-    
+
     clearInterval(updater);
 }
 // Game.showRoom = function (data) {
@@ -168,23 +192,24 @@ Game.outRoom = function (data) {
 // }
 Game.allCreep = function (data) {
     // showCreep(data.creep);
-    
+
     gamestate.players[data.id].health = data.health;
-    console.log(gamestate.players[data.id].health);
+    // console.log(gamestate.players[data.id].health);
     var soldier = pple.get(data.id);
-    if (!soldier) return;  
-    
-    soldier.userData.scale=0.07+gamestate.players[data.id].health/10000;
+    if (!soldier) return;
+
+    soldier.userData.scale = 0.07 + gamestate.players[data.id].health / 10000;
     soldier.setScale();
     //   tb.update();
     // start_renderer();
 }
 Game.startGame = function (data) {
-    document.getElementById('room_id').value = data.room[0];
-    document.getElementById('exp_id').value = data.room[1];
+    document.getElementById("select_room_id").value=data.room[0]+"@"+data.room[1];
+    // document.getElementById('room_id').value = data.room[0];
+    // document.getElementById('exp_id').value = data.room[1];
     let ee = document.getElementById("select_host");
     let host = ee.options[ee.selectedIndex].value;
-    gama = new GAMA(host, "", ""); 
+    gama = new GAMA(host, "", "");
     gama.connect();
 
     gama.socket_id = data.room[0];
@@ -208,6 +233,7 @@ Game.showMessage = function (id, m) {
     soldier.addLabel(createLabelIcon("Player" + id + ': ' + m), true);//, soldier.anchor, 1.5);
     tb.update();
     map.triggerRepaint();
+    $('#console').append("Player" + id + ': ' + m+"\n").scrollBottom();
     // soldier.drawLabelHTML();
     gamestate.players[id].msgtimeout = setTimeout(function () {
         soldier.addLabel(createLabelIcon("Player" + id), true);//, soldier.anchor, 1.5);
