@@ -100,3 +100,13 @@ function sendchat(value){
     }
     filterInput.value = "";
 }
+
+
+function loading_indi() {
+    document.getElementById('loadani').innerHTML = '<div class="loading">Loading</div>';
+}
+function loaded_indi() {
+
+    document.getElementById('loadani').innerHTML = '';
+}
+loading_indi();

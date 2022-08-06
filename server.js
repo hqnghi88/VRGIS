@@ -83,6 +83,7 @@ io.on('connection', function (socket) {
         players.set(socket.player.id, socket.player);
         socket.emit('allplayers', getAllPlayers());
         socket.emit('mainplayer', socket.player);
+        socket.emit('updateRoomList', [...roomlst.keys()]);
         socket.broadcast.emit('newplayer', socket.player);
 
         // socket.on('closeRoom', function (data) {
@@ -111,7 +112,8 @@ io.on('connection', function (socket) {
                                 socket.player.roomloc = [eee[0], eee[1]];
                                 roomlst.delete(roomid);
                                 roomlst.set(roomid, socket.player.roomloc);
-                                socket.player.ori = [eee[0]+ Math.random() / 10000, eee[1]+ Math.random() / 10000];
+                                socket.player.ori = [Number(eee[0])+ (Math.random() / 10000), Number(eee[1])+ (Math.random() / 10000)];
+                                // socket.player.ori = socket.player.roomloc;
                                 socket.player.dest = socket.player.ori;
                                 io.emit('updatePosition', socket.player); 
                                 io.emit('updateRoomList', [...roomlst.keys()]);

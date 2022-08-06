@@ -113,7 +113,7 @@ Game.movePlayer = function (id, dest) {
     // gamestate.players[id].x = gamestate.players[id].x + xx / 1000000;
     // gamestate.players[id].y = gamestate.players[id].y + yy / 1000000;
     // pple.get(id).setCoords([gamestate.players[id].x, gamestate.players[id].y]);
-    // console.log("id "+gamestate.players[id].dest);
+    // console.log("id "+id+ " "+gamestate.players[id].health);
     // console.log("d "+dest);
     if (gamestate.players[id].dest[0] === dest[0] && gamestate.players[id].dest[1] === dest[1]) {
 
@@ -154,7 +154,7 @@ Game.updateRoomList = function (data) {
 Game.updatePosition = function (id, dest) {
     var soldier = pple.get(id);
     if (!soldier) return;
-    // console.log(id);
+    // console.log(dest);
     gamestate.players[id].ori = dest;
     gamestate.players[id].dest = dest;
     soldier.setCoords(dest);
