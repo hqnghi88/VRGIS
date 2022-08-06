@@ -72,7 +72,7 @@ io.on('connection', function (socket) {
             dest: [xx, yy],
             outroom: [xx, yy],
             inroom: [xx, yy],
-            room: [0, 0],
+            room: [],
             roomloc: [],
             health: 0,
             creep: '',
@@ -119,6 +119,7 @@ io.on('connection', function (socket) {
                                 io.emit('updateRoomList', [...roomlst.keys()]);
                                 socket.join(roomid);
                                 io.sockets.in(roomid).emit('started', socket.player);
+                                // io.sockets.in(roomid).emit('updatePosition', socket.player);
 
                                 gamahost.set(roomid, gama);
                                 var updateSource = setInterval(() => {
@@ -152,7 +153,8 @@ io.on('connection', function (socket) {
             });
         });
         socket.on('joinGame', function (data) {
-            socket.join(data[0] + "@" + data[1]);
+            var roomid = data[0] + "@" + data[1]; 
+            socket.join(roomid);
             socket.player.room = [data[0], data[1]];
             socket.player.outroom = socket.player.ori;
             socket.player.ori = roomlst.get(socket.player.room[0] + "@" + socket.player.room[1]);
@@ -169,7 +171,9 @@ io.on('connection', function (socket) {
         });
         socket.on('leaveGame', function (data) {
             // console.log(data);
-            socket.leave(data[0] + "@" + data[1]);
+            var roomid = data[0] + "@" + data[1]; 
+            socket.leave(roomid);
+            socket.player.room = [];
             socket.player.health = 0;
             socket.player.ori = socket.player.outroom;
             socket.player.dest = socket.player.outroom;
@@ -177,7 +181,7 @@ io.on('connection', function (socket) {
             // if (gama && gama.wSocket) {
             //     gama.wSocket.close();
             // }
-            io.emit('updatePosition', socket.player);
+            io.sockets.in(roomid).emit('updatePosition', socket.player);
             socket.emit("outRoom", socket.player);
         });
         socket.on('stopGame', function (data) {
@@ -193,15 +197,19 @@ io.on('connection', function (socket) {
             io.sockets.in(roomid).emit('forceOut', data); 
             roomlst.delete(roomid);
             io.emit('updateRoomList', [...roomlst.keys()]); 
-            // io.emit('updatePosition', socket.player);
-            // socket.emit("outRoom", socket.player);
+            
         });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);
 
             socket.player.dest = [data.x, data.y];
             socket.player.ori = socket.player.dest;
-            io.emit('move', socket.player);
+            if(socket.player.room.length>0){
+                var roomid = socket.player.room[0] + "@" + socket.player.room[1];
+                io.sockets.in(roomid).emit('move', socket.player);
+            }else{
+                io.emit('move', socket.player);
+            }
         });
 
         socket.on('message', function (data) {
