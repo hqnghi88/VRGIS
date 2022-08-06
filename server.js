@@ -74,7 +74,7 @@ io.on('connection', function (socket) {
             inroom: [xx, yy],
             room: [0, 0],
             roomloc: [],
-            health:0,
+            health: 0,
             creep: '',
             msg: ''
             // x: randomInt(100,400),
@@ -94,12 +94,12 @@ io.on('connection', function (socket) {
         //     gama = null;
         //     io.emit('exitRoom', socket.player.id);
         // });
-        socket.on('startGame', function (data) { 
+        socket.on('startGame', function (data) {
 
             // console.log(data);
             var gama = new gamalib.GAMA(data[0], data[1], data[2]);//"ws://localhost:6868/" 
             gama.connect(
-                function (e) { 
+                function (e) {
                     gama.launch(
                         function (e) {
                             // console.log(e);
@@ -110,19 +110,19 @@ io.on('connection', function (socket) {
                                 socket.player.room = [gama.socket_id, gama.exp_id];
                                 var roomid = socket.player.room[0] + "@" + socket.player.room[1];
                                 socket.player.roomloc = [eee[0], eee[1]];
-                                roomlst.delete(roomid);
+                                
                                 roomlst.set(roomid, socket.player.roomloc);
-                                socket.player.ori = [Number(eee[0])+ (Math.random() / 10000), Number(eee[1])+ (Math.random() / 10000)];
+                                socket.player.ori = [Number(eee[0]) + (Math.random() / 10000), Number(eee[1]) + (Math.random() / 10000)];
                                 // socket.player.ori = socket.player.roomloc;
                                 socket.player.dest = socket.player.ori;
-                                io.emit('updatePosition', socket.player); 
+                                io.emit('updatePosition', socket.player);
                                 io.emit('updateRoomList', [...roomlst.keys()]);
                                 socket.join(roomid);
                                 io.sockets.in(roomid).emit('started', socket.player);
 
                                 gamahost.set(roomid, gama);
                                 var updateSource = setInterval(() => {
-                                    if(gamahost.get(socket.player.room[0] + "@" + socket.player.room[1])){
+                                    if (gamahost.get(socket.player.room[0] + "@" + socket.player.room[1])) {
                                         gamahost.get(socket.player.room[0] + "@" + socket.player.room[1]).step();
                                     }
                                 }, data[3]);
@@ -138,12 +138,12 @@ io.on('connection', function (socket) {
 
         socket.on('killAgent', function (data) {
             let roomid = socket.player.room[0] + "@" + socket.player.room[1];
-            let sss=data.toString().replace(/,/g,'","');
+            let sss = data.toString().replace(/,/g, '","');
             // console.log('ask prey where(each.name in ["' +  sss+ '"]){do die;}');
             gamahost.get(roomid).evalExpr('ask prey where(each.name in ["' + sss + '"]){do die;}', function (ee) {
                 // gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
                 //     if (typeof message == "object") {
-                    socket.player.health=socket.player.health+((data.toString().split(',')).length+1);
+                socket.player.health = socket.player.health + ((data.toString().split(',')).length + 1);
                 //     } else {
                 //         socket.player.creep = JSON.parse(message);
                 io.sockets.in(roomid).emit('allCreep', socket.player);
@@ -152,7 +152,7 @@ io.on('connection', function (socket) {
             });
         });
         socket.on('joinGame', function (data) {
-            socket.join(data[0] + "" + data[1]);
+            socket.join(data[0] + "@" + data[1]);
             socket.player.room = [data[0], data[1]];
             socket.player.outroom = socket.player.ori;
             socket.player.ori = roomlst.get(socket.player.room[0] + "@" + socket.player.room[1]);
@@ -168,8 +168,9 @@ io.on('connection', function (socket) {
             socket.emit("intoRoom", socket.player);
         });
         socket.on('leaveGame', function (data) {
-            socket.leave(data[0] + "" + data[1]);
-            socket.player.health = 0; 
+            // console.log(data);
+            socket.leave(data[0] + "@" + data[1]);
+            socket.player.health = 0;
             socket.player.ori = socket.player.outroom;
             socket.player.dest = socket.player.outroom;
             // clearInterval(updateSource);
@@ -178,6 +179,22 @@ io.on('connection', function (socket) {
             // }
             io.emit('updatePosition', socket.player);
             socket.emit("outRoom", socket.player);
+        });
+        socket.on('stopGame', function (data) {
+            var roomid = data[0] + "@" + data[1]; 
+
+            clearInterval(updaterhost.get(roomid));
+            if (gamahost.get(roomid) && gamahost.get(roomid).wSocket) {
+                gamahost.get(roomid).wSocket.close();
+            }
+            gamahost.delete(roomid);
+            updaterhost.delete(roomid);
+            
+            io.sockets.in(roomid).emit('forceOut', data); 
+            roomlst.delete(roomid);
+            io.emit('updateRoomList', [...roomlst.keys()]); 
+            // io.emit('updatePosition', socket.player);
+            // socket.emit("outRoom", socket.player);
         });
         socket.on('click', function (data) {
             // console.log('click to '+data.x+', '+data.y);

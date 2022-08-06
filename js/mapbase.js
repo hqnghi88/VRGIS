@@ -274,3 +274,53 @@ function light(feature) {
 // function createRoom() {
 // }
  
+function createCompositeLayer(layerId) {
+    let layer = {
+        'id': layerId,
+        'source': mapConfig.names.compositeSource,
+        'source-layer': mapConfig.names.compositeSourceLayer,
+        'filter': ['==', 'extrude', 'true'],
+        'type': 'fill-extrusion',
+        'minzoom': minZoom,
+        'paint': {
+            'fill-extrusion-color':
+                [
+                    'case',
+                    ['boolean', ['feature-state', 'select'], false],
+                    "red",
+                    ['boolean', ['feature-state', 'hover'], false],
+                    "lightblue",
+                    '#aaa'
+                ],
+
+            // use an 'interpolate' expression to add a smooth transition effect to the
+            // buildings as the user zooms in
+            'fill-extrusion-height': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                minZoom,
+                0,
+                minZoom + 0.05,
+                ['get', 'height']
+            ],
+            'fill-extrusion-base': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                minZoom,
+                0,
+                minZoom + 0.05,
+                ['get', 'min_height']
+            ],
+            'fill-extrusion-opacity': 0.9
+        }
+    };
+    return layer;
+}
+
+let api = {
+    buildings: true,
+    acceleration: 2,
+    inertia: 3
+};

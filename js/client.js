@@ -19,6 +19,9 @@ Client.joinGame= function(data){
 Client.leaveGame= function(data){
     Client.socket.emit('leaveGame',data);
 };
+Client.stopGame= function(data){
+    Client.socket.emit('stopGame',data);
+};
 Client.killAgent= function(data){
     Client.socket.emit('killAgent',data);
 };
@@ -47,6 +50,9 @@ Client.socket.on('mainplayer',function(data){
 });
 Client.socket.on('updateRoomList', function (data) {
     Game.updateRoomList(data);
+});
+Client.socket.on('forceOut', function (data) {      
+    Client.leaveGame(data);
 });
 
 Client.socket.on('allplayers', function (data) {
