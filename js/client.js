@@ -23,7 +23,7 @@ Client.stopGame= function(data){
     Client.socket.emit('stopGame',data);
 };
 Client.killAgent= function(data){
-    Client.socket.emit('killAgent',data);
+    // Client.socket.emit('killAgent',data);
 };
 // Client.createRoom= function(data){
 //     Client.socket.emit('createRoom',data);

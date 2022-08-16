@@ -16,8 +16,9 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
 	<link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
 	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>    
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 
 </head>
 
@@ -41,10 +42,16 @@
 						</select></td>
 					<td>
 						<select id="select_mode_exp" className="form-control" name="model_path"
-							onChange={this.handleChange} defaultValue={this.state.model_path}> 
+							onChange={this.handleChange} defaultValue={this.state.model_path}>
 							<option
 								value="C:/git/gama/msi.gama.models/models/Modeling/Model Coupling/Co-PreyPredator/Prey Predator.gaml@Prey Predator Exp">
 								Prey Predator Exp</option>
+							<option
+								value="C:/git/gama/msi.gama.models/models/Toy Models/Flood Simulation/models/Hydrological Model.gaml@Run">
+								Hydrological Model</option>
+							<option
+								value="C:/git/gama/msi.gama.models/models/Tutorials/Predator Prey/models/Model 06.gaml@prey_predator">
+								Model 06</option>
 							<option
 								value="/var/www/github/gama/msi.gama.models/models/Modeling/Model Coupling/Co-PreyPredator/Prey Predator.gaml@Prey Predator Exp">
 								OVH Prey Predator Exp</option>
@@ -75,7 +82,7 @@
 					<input id="room-leave" type="button" value="Exit" style="width: 100px;" onclick="exitGame()">
 					<input id="room-close" type="button" value="Stop" style="width: 100px;" onclick="stopGame()">
 					<div></div>
-					Room:<select id="select_room_id" className="form-control" name="room_id"> 
+					Room:<select id="select_room_id" className="form-control" name="room_id">
 					</select>
 					<!-- <input id="room_id" type="text" name="room_id" style="width: 70px;">
 					<input id="exp_id" type="text" name="exp_id" style="width: 70px;"> -->
@@ -87,7 +94,7 @@
 						onclick="sendchat(filterInput.value.trim().toLowerCase());">
 					<div>
 
-						<textarea  rows="4" cols="32" id="console"></textarea>
+						<textarea rows="4" cols="32" id="console"></textarea>
 					</div>
 					<!-- </div> -->
 				</td>

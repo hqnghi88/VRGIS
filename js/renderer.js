@@ -1,5 +1,5 @@
 
-var pple = new Map(); 
+var pple = new Map();
 function startGame() {
     let ee = document.getElementById("select_host");
     let host = ee.options[ee.selectedIndex].value;
@@ -41,7 +41,7 @@ function stopGame() {
     if (s === "" || e === "") {
     } else {
         Client.stopGame([s, e]);
- 
+
     }
 }
 function easing(t) {
@@ -120,7 +120,7 @@ function travelPath(id, destination, run) {
 
     // })
 }
-   
+
 function centerSoldier() {
 
     var soldier = pple.get(main_id);
@@ -150,28 +150,84 @@ function on_connected() {
 function on_disconnected() {
     console.log("dis");
     clearInterval(updater);
-} 
+}
+var geojsonMap = new Map();
+function createSources(ee) {
+    ee = JSON.parse(ee).result.replace(/[\])}[{(]/g, '').replace(/['"]+/g, '');
+    var eee = ee.split(",");
+    eee.forEach((e) => {
+        geojsonMap.set(e, {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [0, 0]
+                    }
+                }
+            ]
+        });
+        if (!map.getSource(`source${e}`)) {
+            map.addSource(`source${e}`, {
+                type: 'geojson',
+                data: geojsonMap.get(e)
+            });
+        }
+    });
+    // gama.endRequest();
+    geojsonMap.forEach(logMapElements);
+}
+function logMapElements(value, key, mm) {
+    gama.getPopulation(key, ["name", "color"], "EPSG:4326", updateLayer);
+
+    function updateLayer(message) {
+        if (typeof message == "object" || message == "") {
+
+        } else {
+            // geojson = null;
+            // console.log(message);
+            try {
+
+                var tmp = JSON.parse(message);
+                if (!map.style.getLayer(`source${key}`)) {
+                    // console.log("layer added");
+                    addLayer(tmp.features[0].geometry.type, key);
+                }
+                map.getSource(`source${key}`).setData(tmp);
+            } catch (e) {
+                console.log('JSON.parse: ' + message);
+                // throw new Error('Error occured: ', e);
+            }
+
+        }
+    }
+}
 function start_renderer() {
+    gama.evalExpr("species(world).microspecies", createSources);
     updater = setInterval(() => {
         // if (gama.state === "play") {
         // gama.step( 
         // console.log(gama);
 
-        gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
-            // console.log(message);
-            if (typeof message == "object") {
+        // if (gama.state === "play") {
+        geojsonMap.forEach(logMapElements);
+        // }
+        // gama.getPopulation("prey", ["name", "color"], "EPSG:4326", function (message) {
+        //     // console.log(message);
+        //     if (typeof message == "object") {
 
-            } else {
-                try {
-                    geojson = JSON.parse(message);
+        //     } else {
+        //         try {
+        //             geojson = JSON.parse(message);
 
-                    map.getSource("floorplan").setData(geojson);
-                } catch (e) {
-                    console.log('JSON.parse: ' + message);
-                    // throw new Error('Error occured: ', e);
-                }
-            }
-        });
+        //             map.getSource("floorplan").setData(geojson);
+        //         } catch (e) {
+        //             console.log('JSON.parse: ' + message);
+        //             // throw new Error('Error occured: ', e);
+        //         }
+        //     }
+        // });
         // gama.getPopulation("people", ["name"], "EPSG:4326", function (message) {
         //     if (typeof message == "object") {
 

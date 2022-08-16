@@ -115,45 +115,45 @@ map.on('style.load', function () {
             .addTo(map);
     });
 
-    map.addSource('floorplan', {
-        'type': 'geojson',
-        /*
-        * Each feature in this GeoJSON file contains values for
-        * `properties.height`, `properties.base_height`,
-        * and `properties.color`.
-        * In `addLayer` you will use expressions to set the new
-        * layer's paint properties based on these values.
-        */
-        'data': geojson
-    });
-    map.addLayer({
+    // map.addSource('floorplan', {
+    //     'type': 'geojson',
+    //     /*
+    //     * Each feature in this GeoJSON file contains values for
+    //     * `properties.height`, `properties.base_height`,
+    //     * and `properties.color`.
+    //     * In `addLayer` you will use expressions to set the new
+    //     * layer's paint properties based on these values.
+    //     */
+    //     'data': geojson
+    // });
+    // map.addLayer({
 
-        // 'id': 'room-extrusion',
-        // 'type': 'circle',
-        // 'source': 'floorplan',
-        // 'layout': {},
-        // 'paint': {
-        //     'circle-color':['get', 'color'],
-        // }
+    //     // 'id': 'room-extrusion',
+    //     // 'type': 'circle',
+    //     // 'source': 'floorplan',
+    //     // 'layout': {},
+    //     // 'paint': {
+    //     //     'circle-color':['get', 'color'],
+    //     // }
 
 
-        'id': 'room-extrusion',
-        'type': 'fill-extrusion',
-        'source': 'floorplan',
-        'paint': {
-            // Get the `fill-extrusion-color` from the source `color` property.
-            'fill-extrusion-color': ['get', 'color'],
+    //     'id': 'room-extrusion',
+    //     'type': 'fill-extrusion',
+    //     'source': 'floorplan',
+    //     'paint': {
+    //         // Get the `fill-extrusion-color` from the source `color` property.
+    //         'fill-extrusion-color': ['get', 'color'],
 
-            // Get `fill-extrusion-height` from the source `height` property.
-            'fill-extrusion-height': 1,// ['get', 'height'],
+    //         // Get `fill-extrusion-height` from the source `height` property.
+    //         'fill-extrusion-height': 1,// ['get', 'height'],
 
-            // Get `fill-extrusion-base` from the source `base_height` property.
-            'fill-extrusion-base': 0,//['get', 'base_height'],
+    //         // Get `fill-extrusion-base` from the source `base_height` property.
+    //         'fill-extrusion-base': 0,//['get', 'base_height'],
 
-            // Make extrusions slightly opaque to see through indoor walls.
-            // 'fill-extrusion-opacity': 0.5
-        }
-    });
+    //         // Make extrusions slightly opaque to see through indoor walls.
+    //         // 'fill-extrusion-opacity': 0.5
+    //     }
+    // });
     // map.on('sourcedata', function(e) {
 
     //     // if (e.sourceId !== 'total') return
@@ -223,28 +223,28 @@ function createLabelIcon(text) {
 function onObjectChanged(e) {
     if (pple.get(main_id) !== e) return;
     let model = e;//e.detail.object; //here's the object already modified
-    if (api.buildings) {
-        let c = model.coordinates;
-        let point = map.project(c);
-        // let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
+    // if (api.buildings) {
+    //     let c = model.coordinates;
+    //     let point = map.project(c);
+    //     // let features = map.queryRenderedFeatures(point, { layers: ["room-extrusion"] });
 
-        let dd = 100;
-        var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
-        var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
-        if (features.length > 0) {
-            // console.log(features);
-            var pna = [];
-            features.forEach(e => {
-                if (!e.state.select) {
-                    pna.push(e.properties.name);
-                    light(e);
-                }
-            });
-            if (pna.length > 0) {
-                Client.killAgent(pna);
-            }
-        }
-    }
+    //     let dd = 100;
+    //     var bbox = [[point.x - dd, point.y - dd], [point.x + dd, point.y + dd]];
+    //     var features = map.queryRenderedFeatures(bbox, { layers: ["room-extrusion"] });
+    //     if (features.length > 0) {
+    //         // console.log(features);
+    //         var pna = [];
+    //         features.forEach(e => {
+    //             if (!e.state.select) {
+    //                 pna.push(e.properties.name);
+    //                 light(e);
+    //             }
+    //         });
+    //         if (pna.length > 0) {
+    //             Client.killAgent(pna);
+    //         }
+    //     }
+    // }
 }
 
 function light(feature) {
@@ -254,12 +254,12 @@ function light(feature) {
         id: feature.id
     }, { select: true });
     // console.log(e);
-    geojson.features.forEach(function (item, index) {
-        if (("" + item["id"]) === ("" + feature.id)) {
-            geojson.features.splice(index, 1);
-            map.getSource("floorplan").setData(geojson);
-        }
-    });
+    // geojson.features.forEach(function (item, index) {
+    //     if (("" + item["id"]) === ("" + feature.id)) {
+    //         geojson.features.splice(index, 1);
+    //         map.getSource("floorplan").setData(geojson);
+    //     }
+    // });
     // geojson.features.pop(e);
     // console.log(geojson.features);
     // geojson.features = geojson.features.filter(val => val.id !== e.id)
@@ -324,3 +324,63 @@ let api = {
     acceleration: 2,
     inertia: 3
 };
+
+function addLayer(type, key) {
+
+	if (type === 'LineString') {
+		map.addLayer({
+			'id': `source${key}`,
+			'type': 'line',
+			'source': `source${key}`, // reference the data source
+			'layout': {},
+			'paint': {
+				'line-color': {
+					type: 'identity',
+					property: 'color',
+				},
+			}
+		});
+	} else if (type === 'Point') {
+
+		map.addLayer({
+			'id': `source${key}`,
+			'type': 'circle',
+			'source': `source${key}`, // reference the data source
+			'layout': {},
+			'paint': {
+				'circle-color': {
+					type: 'identity',
+					property: 'color',
+				},
+			}
+		});
+	} else {
+
+		map.addLayer({
+			'id': `source${key}`,
+			'type': 'fill',
+			'source': `source${key}`, // reference the data source
+			'layout': {},
+			'paint': {
+
+				'fill-color': {
+					type: 'identity',
+					property: 'color',
+				},
+				'fill-outline-color': 'rgba(0,0,0,0)',
+
+				// 'fill-color': '#0080ff', // blue color fill
+				'fill-opacity': 0.5
+			}
+		});
+	}
+	map.on('click', `source${key}`, (e) => {
+		new mapboxgl.Popup()
+			.setLngLat(e.lngLat)
+			.setHTML(e.features[0].properties.name)
+			.addTo(map);
+	});map.on('idle',function(){
+		map.resize()
+		})
+
+} 
